@@ -1,11 +1,4 @@
-import { Options, ChalkInstance, ColorInfo, ColorName } from 'chalk';
-import { Modifier, ForegroundColor, BackgroundColor } from 'chalk/source/vendor/ansi-styles';
-
-let chalk: { hex?: any; whiteBright?: any; Chalk?: new (options?: Options | undefined) => ChalkInstance; supportsColor?: ColorInfo; chalkStderr?: ChalkInstance; supportsColorStderr?: ColorInfo; modifierNames?: any; foregroundColorNames?: any; backgroundColorNames?: any; colorNames?: any; modifiers?: readonly (keyof Modifier)[]; foregroundColors?: readonly (keyof ForegroundColor)[]; backgroundColors?: readonly (keyof BackgroundColor)[]; colors?: readonly ColorName[]; default?: any; };
-
-(async () => {
-    chalk = await import('chalk');
-})
+import chalk from 'chalk'
 
 export type options = {
     logLevel?: Level,
@@ -15,15 +8,15 @@ export type options = {
     expandedFatal?: boolean
 };
 
-type hex = `#${string}`
+type hex = string
 
 type colours = {
-    trace?: hex | `#42ecff`
-    debug?: hex | `#008504`
-    info?:  hex | `#00c1d6`
-    warn?:  hex | `#ffee00`
-    error?: hex | `#ff5e00`
-    fatal?: hex | `#ff0000`
+    trace: hex
+    debug: hex
+    info: hex
+    warn: hex
+    error: hex
+    fatal: hex
 }
 
 enum Level {
@@ -35,16 +28,16 @@ enum Level {
     fatal = 5,
 }
 
-export default class logger {
+export class logger {
     readonly defaultTraceColour: hex = `#42ecff`
     readonly defaultDebugColour: hex = `#008504`
     readonly defaultInfoColour: hex = `#00c1d6`
     readonly defaultWarnColour: hex = `#ffee00`
     readonly defaultErrorColour: hex = `#ff5e00`
     readonly defaultFatalColour: hex = `#ff0000`
-    options : options = {}
-    
-    constructor(name:string, options?:options) {
+    options: options = {}
+
+    constructor(name: string, options?: options) {
         if (options?.suppressWarnings === true) {
             if (name.length > 15) throw new Error("Name invalid. Check the FAQ");
             const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
@@ -53,7 +46,7 @@ export default class logger {
 
             this.options = options
         }
-                
+
     }
     /**
      * Calls the log to output
@@ -62,13 +55,41 @@ export default class logger {
      * @param level The level to log at
      * @param data Extra data that came along
      */
-    private async log(message: string, level: Level, ...data: Array<unknown>) {
+    private async log(message: string, level: Level, ...data: Array<unknown>): Promise<void> {
         const colours = this.options.colours
 
+        let colour;
+
         if (level === 5) {
+            if (!colours) colour = this.defaultFatalColour;
+            else colour = colours.fatal;
+
             if (this.options.expandedFatal) {
-                console.log(chalk.hex(colours?.fatal ?? this.defaultFatalColour) + `--- FATAL ERROR --- \n` + chalk.whiteBright + message + `\n`, ...data)
+                // @ts-ignore
+                console.log(chalk.hex(colour) + `--- FATAL ERROR --- \n` + chalk.whiteBright + message + `\n` + data)
+            } else {
+                // @ts-ignore
+                console.log(chalk.hex(colour) + `--- FATAL ERROR ---` + chalk.whiteBright + message + data)
             }
+        } else {
+            if (!colours) {
+                if (level === 0) colour = this.defaultTraceColour;
+                if (level === 1) colour = this.defaultDebugColour;
+                if (level === 2) colour = this.defaultInfoColour;
+                if (level === 3) colour = this.defaultWarnColour;
+                if (level === 4) colour = this.defaultErrorColour;
+            } else {
+                if (level === 0) colour = colours.trace;
+                if (level === 1) colour = colours.debug;
+                if (level === 2) colour = colours.info;
+                if (level === 3) colour = colours.warn;
+                if (level === 4) colour = colours.error;
+            }
+
+            if (!colour) throw new Error(`Colour missing`)
+
+            // @ts-ignore
+            console.log(chalk.hex(colour) + Level[level] + chalk.whiteBright + message + data)
         }
     }
 
@@ -78,7 +99,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async fatal(message: string, ...data:Array<unknown>) {
+    public async fatal(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.fatal, data);
         if (this.options.quitOnFatal) process.exit(1);
     }
@@ -87,7 +108,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async trace(message: string, ...data:Array<unknown>) {
+    public async trace(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.trace, data);
     }
     /**
@@ -95,7 +116,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async debug(message: string, ...data:Array<unknown>) {
+    public async debug(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.debug, data);
     }
     /**
@@ -103,7 +124,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async info(message: string, ...data:Array<unknown>) {
+    public async info(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.info, data);
     }
     /**
@@ -111,7 +132,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async warn(message: string, ...data:Array<unknown>) {
+    public async warn(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.warn, data);
     }
     /**
@@ -119,7 +140,7 @@ export default class logger {
      * @param message 
      * @param data 
      */
-    async error(message: string, ...data:Array<unknown>) {
+    public async error(message: string, ...data: Array<unknown>): Promise<void> {
         this.log(message, Level.error, data);
     }
 }

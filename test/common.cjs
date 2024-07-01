@@ -1,5 +1,9 @@
-const logger = require("../dist/index")
+const logger = require("../dist/index");
 
-const log = new logger('test');
+const log = new logger("test");
 
-log.info("auuuh", {"auuuh":{"test":4}, "why": 3});
+try {
+    log.info("auuuh", { auuuh: { test: 4 }, why: 3 });
+} catch (err) {
+    console.log(err.stack);
+}
