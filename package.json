@@ -28,6 +28,6 @@
     "typescript": "5.4.4"
   },
   "dependencies": {
-    "chalk": "^5.3.0"
+    "console-log-colors": "^0.5.0"
   }
 }
