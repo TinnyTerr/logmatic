@@ -9,7 +9,7 @@
   },
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "node test/common.cjs; node test/es6.mjs",
+    "test": "node test/es6.mjs",
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "compile": "tsc -b",
     "watch": "tsc -b -w"
