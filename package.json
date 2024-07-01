@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "./dist/index.cjs",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tinnyterr/logmatic.git"
+  },
   "exports": {
     "import": "./dist/index.mjs",
     "require": "./dist/index.cjs"
