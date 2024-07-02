@@ -5,7 +5,7 @@
   "bugs": {
     "url": "https://github.com/tinnyterr/logmatic/issues"
   },
-  "license":"MPL-2.0",
+  "license": "MPL-2.0",
   "author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
   "main": "./dist/index.js",
   "type": "module",
@@ -38,6 +38,7 @@
     "typescript": "5.4.4"
   },
   "dependencies": {
-    "console-log-colors": "^0.5.0"
+    "console-log-colors": "^0.5.0",
+    "pretty-format": "^29.7.0"
   }
 }
