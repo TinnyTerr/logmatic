@@ -1,6 +1,6 @@
 {
   "name": "logmatic",
-  "version": "1.2.1",
+  "version": "1.2.2-pre1",
   "homepage": "https://github.com/tinnyterr/logmatic#readme",
   "bugs": {
     "url": "https://github.com/tinnyterr/logmatic/issues"
@@ -14,15 +14,15 @@
     "url": "https://github.com/tinnyterr/logmatic.git"
   },
   "exports": {
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.cjs"
+    "import": "./dist/index.js"
   },
-  "types": "dist/index.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "node test/es6.mjs",
-    "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w"
+    "test": "node test.js",
+    "clean": "rm -rf *.log */*.log */out node_modules",
+    "dev/compile": "tsc -b",
+    "dev/watch": "tsc -b -w",
+    "compile" : "tsc --outDir ./dist/es6 -m es6; tsc --outDir ./dist/commonjs -m commonjs"
   },
   "devDependencies": {
     "@types/node": "18.19.30",

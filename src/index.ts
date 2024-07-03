@@ -1,5 +1,5 @@
 import consoleColours from 'console-log-colors';
-import { plugins, format as prettyFormat } from 'pretty-format';
+import { format as prettyFormat } from 'pretty-format';
 
 let formatOptions: object;
 
