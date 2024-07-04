@@ -1,5 +1,5 @@
 import consoleColours from 'console-log-colors';
-import { plugins, format as prettyFormat } from 'pretty-format';
+import { format as prettyFormat } from 'pretty-format';
 
 let formatOptions: object;
 
@@ -71,42 +71,42 @@ export class logger {
     public trace(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.blue`[Trace]`, message, data)
+        return this.log(consoleColours.blue`[Trace]`, message, data)
         // console.log(consoleColours.blue`[Trace]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     public debug(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.cyan`[Debug]`, message, data)
+        return this.log(consoleColours.cyan`[Debug]`, message, data)
         // console.log(consoleColours.cyan`[Debug]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     public info(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.blueBright`[Info]`, message, data)
+        return this.log(consoleColours.blueBright`[Info]`, message, data)
         // console.log(consoleColours.blueBright`[Info]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     public warn(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.yellow`[Warn]`, message, data)
+        return this.log(consoleColours.yellow`[Warn]`, message, data)
         // console.log(consoleColours.yellow`[Warn]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     public error(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.red`[Error]`, message, data)
+        return this.log(consoleColours.red`[Error]`, message, data)
         // console.log(consoleColours.red`[Error]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     public fatal(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        this.log(consoleColours.redBG`[Fatal]`, message, data)
+        return this.log(consoleColours.redBG`[Fatal]`, message, data)
         // console.log(consoleColours.redBG`[Fatal]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
     }
     private internalLogging(message: string, ...data: Array<unknown>) {
         if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        console.log(`\n` + consoleColours.greenBright`[Internal]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`) + `\n`);
+        return console.log(`\n` + consoleColours.greenBright`[Internal]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`) + `\n`);
     }
 }
