@@ -33,10 +33,15 @@ export class logger {
 
     constructor(name: string, options?: options) {
         let lvlIndent: number = 0;
+        
+        this.internalLogging("Log Level is current erroring out and defaults to trace")
 
         if (!options) options = { logLevel: Level.debug }
         else {
-            if (!options.logLevel === undefined) options.logLevel === Level.debug
+            if (!options.logLevel === undefined) {
+                options.logLevel === Level.debug;
+                
+            }
             if (options.indent === undefined) lvlIndent === 0;
             // * NO MORE DO WE HAVE THE INDENTATION WARNING WHOOOOOH
         }

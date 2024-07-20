@@ -1,44 +1,45 @@
 {
-  "name": "logmatic",
-  "version": "1.2.2-pre1",
-  "homepage": "https://github.com/tinnyterr/logmatic#readme",
-  "bugs": {
-    "url": "https://github.com/tinnyterr/logmatic/issues"
-  },
-  "license": "MPL-2.0",
-  "author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
-  "main": "./dist/index.js",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tinnyterr/logmatic.git"
-  },
-  "exports": {
-    "import": "./dist/index.js"
-  },
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "test": "node test.js",
-    "clean": "rm -rf *.log */*.log */out node_modules",
-    "dev/compile": "tsc -b",
-    "dev/watch": "tsc -b -w",
-    "compile" : "tsc --outDir ./dist/es6 -m es6; tsc --outDir ./dist/commonjs -m commonjs"
-  },
-  "devDependencies": {
-    "@types/node": "18.19.30",
-    "@typescript-eslint/eslint-plugin": "7.5.0",
-    "@typescript-eslint/parser": "7.5.0",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-jest": "27.9.0",
-    "eslint-plugin-prettier": "4.2.1",
-    "eslint-plugin-simple-import-sort": "12.0.0",
-    "eslint-plugin-sort-class-members": "1.20.0",
-    "prettier": "2.8.8",
-    "typescript": "5.4.4"
-  },
-  "dependencies": {
-    "console-log-colors": "^0.5.0",
-    "pretty-format": "^29.7.0"
-  }
+    "name": "logmatic",
+    "version": "1.2.2-pre1",
+    "homepage": "https://github.com/tinnyterr/logmatic#readme",
+    "bugs": {
+        "url": "https://github.com/tinnyterr/logmatic/issues"
+    },
+    "license": "MPL-2.0",
+    "author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
+    "main": "./dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tinnyterr/logmatic.git"
+    },
+    "exports": {
+        "import": "./dist/es6/index.mjs",
+        "require": "./dist/commonjs/index.cjs"
+    },
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "pretest": "./compile",
+        "test": "node test/index.cjs ; node test/index.mjs",
+        "posttest": "rm -rf *.log */*.log */dist node_modules",
+        "dev/compile": "tsc -b",
+        "dev/watch": "tsc -b -w",
+        "compile": "./compile"
+    },
+    "devDependencies": {
+        "@types/node": "18.19.30",
+        "@typescript-eslint/eslint-plugin": "7.5.0",
+        "@typescript-eslint/parser": "7.5.0",
+        "eslint": "8.57.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-jest": "27.9.0",
+        "eslint-plugin-prettier": "4.2.1",
+        "eslint-plugin-simple-import-sort": "12.0.0",
+        "eslint-plugin-sort-class-members": "1.20.0",
+        "prettier": "2.8.8",
+        "typescript": "5.4.4"
+    },
+    "dependencies": {
+        "console-log-colors": "^0.5.0",
+        "pretty-format": "^29.7.0"
+    }
 }
