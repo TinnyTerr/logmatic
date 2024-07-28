@@ -19,8 +19,8 @@
     "types": "./dist/index.d.ts",
     "scripts": {
         "pretest": "./compile",
-        "test": "node test/index.cjs ; node test/index.mjs",
-        "posttest": "rm -rf *.log */*.log */dist node_modules",
+        "test": "node tests/test.cjs ; node tests/test.mjs",
+        "posttest": "rm -rf *.log */*.log */dist node_modules ; npm i ",
         "dev/compile": "tsc -b",
         "dev/watch": "tsc -b -w",
         "compile": "./compile"
