@@ -14,14 +14,4 @@ mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs
 
 printf "Finished compiling\n"
 
-
-cd test
-npm ci
-
-rm -rf ../node_modules node_modules/logmatic
-mkdir -p ./node_modules/logmatic/
-cp -r ../* ./node_modules/logmatic/
-
-printf "Script finished\n"
-
 exit 0
