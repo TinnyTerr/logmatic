@@ -1,6 +1,6 @@
 {
     "name": "logmatic",
-    "version": "1.2.2-pre1",
+    "version": "1.4",
     "homepage": "https://github.com/tinnyterr/logmatic#readme",
     "bugs": {
         "url": "https://github.com/tinnyterr/logmatic/issues"
@@ -18,13 +18,17 @@
     },
     "types": "./dist/index.d.ts",
     "scripts": {
-        "pretest": "./compile",
+        "pretest": " npx tsc --outDir ./dist/es6 -m es6 ; npx tsc --outDir ./dist/commonjs -m commonjs ; mv ./dist/es6/index.js ./dist/es6/index.mjs ; mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs",
         "test": "node tests/test.cjs ; node tests/test.mjs",
         "posttest": "rm -rf *.log */*.log */dist node_modules ; npm i ",
         "dev/compile": "tsc -b",
         "dev/watch": "tsc -b -w",
         "compile": "./compile"
     },
+    "os": [
+        "linux-BUILDING-ONLY",
+        "universal-USE"
+    ],
     "devDependencies": {
         "@types/node": "18.19.30",
         "@typescript-eslint/eslint-plugin": "7.5.0",
