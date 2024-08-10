@@ -121,6 +121,8 @@ export class logger implements config {
     }
 
     private async log(level: Level, ...data: Array<any>): Promise<void> {
+        if (this.options.logLevel > level) return;
+
         const temp = data
             .map((element) => {
                 if (typeof element === 'string') {
