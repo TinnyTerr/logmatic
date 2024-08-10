@@ -1,46 +1,99 @@
 import consoleColours from 'console-log-colors';
-import { format as prettyFormat } from 'pretty-format';
+import { colorize } from 'json-colorizer';
 
 let formatOptions: object;
 
-export type options = {
-    logLevel?: Level; // default 1
+export interface options {
+    logLevel?: Level;
     suppressWarnings?: boolean;
     quitOnFatal?: boolean;
     format?: boolean;
-    indent?: number
-};
+    indent?: number | boolean;
+}
+
+interface config {
+    options: {
+        logLevel: Level;
+        suppressWarnings: boolean;
+        quitOnFatal: boolean;
+        format: boolean;
+        indent: number;
+    };
+}
 
 enum Level {
-    trace = 0,
-    debug = 1,
-    info = 2,
-    warn = 3,
-    error = 4,
-    fatal = 5,
+    trace,
+    debug,
+    info,
+    warn,
+    error,
+    fatal,
 }
 
 function getTime(): string {
     const now = new Date();
-    const date = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
     return date.toISOString().replace(/.*T(.*)Z/, '$1');
 }
 
-export class logger {
-    name: string = ""
-    options: options = {};
-    indent: number = 0
+export class logger implements config {
+    name: string = '';
+    options: config['options'] = {
+        logLevel: 1,
+        suppressWarnings: false,
+        quitOnFatal: false,
+        format: false,
+        indent: 0,
+    };
 
     constructor(name: string, options?: options) {
-        let lvlIndent: number = 0;
-        
-        this.internalLogging("Log Level is current erroring out and defaults to trace")
+        this.internalLogging('[WARN] ');
 
-        if (!options) options = { logLevel: Level.debug }
+        // Define config
+        this.name = `${name}`;
+
+        //* Setback option definitions to set values
+
+        if (!options) {
+            this.options = {
+                logLevel: 1,
+                suppressWarnings: false,
+                quitOnFatal: false,
+                format: false,
+                indent: 0,
+            };
+        } else {
+            this.options.logLevel = options.logLevel ?? 1;
+            this.options.suppressWarnings = options.suppressWarnings ?? false;
+            this.options.quitOnFatal = options.quitOnFatal ?? false;
+            this.options.format = options.format ?? false;
+            if (options.indent === false) this.options.indent = 0;
+            else if (options.indent === true) this.options.indent = 4;
+            else if (
+                typeof options.indent === 'number' ||
+                typeof options.indent === 'undefined'
+            )
+                this.options.indent = options.indent ?? 0;
+            else throw new TypeError('Indentation option is not a valid type');
+        }
+
+        const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
+        const matches = name.match(ansiRegex) ?? [];
+        if (matches.length > 0 && this.options.suppressWarnings === false)
+            throw new Error('ANSI characters in name found.');
+        else if (matches.length > 0)
+            this.internalLogging(
+                'Warning, name contains ANSI characters. May affect colouring in the terminal',
+            );
+
+        /*let lvlIndent: number = 0;
+
+        this.internalLogging('Log Level is current erroring out and defaults to trace');
+
+        if (!options) options = { logLevel: Level.debug };
         else {
             if (!options.logLevel === undefined) {
                 options.logLevel === Level.debug;
-                
             }
             if (options.indent === undefined) lvlIndent === 0;
             // * NO MORE DO WE HAVE THE INDENTATION WARNING WHOOOOOH
@@ -52,66 +105,159 @@ export class logger {
             if (matches.length > 0) throw new Error('ANSI characters in name found.');
         }
 
-        this.options = options
+        this.options = options?.options;
         if (options.indent && options.indent > 0) {
             formatOptions = {
                 highlight: true,
-                indent: options.indent
-            }
+                indent: options.indent,
+            };
         } else {
             formatOptions = {
                 highlight: true,
-                min: true
-            }
+                min: true,
+            };
         }
-        this.name = `${name}`
+        this.name = `${name}`;*/
     }
 
-    log(title: string, message: string, data: Array<unknown> | string) {
-        let name = this.name;
+    private async log(level: Level, ...data: Array<any>): Promise<void> {
+        if (this.options.logLevel > level) return;
 
-        return console.log(consoleColours.grey(getTime()), consoleColours.white(name), title, consoleColours.reset(message), consoleColours.green(prettyFormat(data, formatOptions)));
+        const temp = data
+            .map((element) => {
+                if (typeof element === 'string') {
+                    return element;
+                } else if (typeof element === 'object') {
+                    return colorize(JSON.stringify(element), {
+                        indent: this.options.indent,
+                    });
+                } else {
+                    return String(element);
+                }
+            })
+            .join(' ');
+
+        let msg = '';
+
+        switch (level) {
+            case Level.trace:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(this.name)}${consoleColours.blue(
+                    ' [Trace] ',
+                )}${temp}`;
+                break;
+
+            case Level.debug:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
+                    '[Debug]',
+                )} ${temp}`;
+                break;
+
+            case Level.info:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(
+                    this.name,
+                )} ${consoleColours.blueBright('[Info]')} ${temp}`;
+                break;
+
+            case Level.warn:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(
+                    this.name,
+                )} ${consoleColours.yellow('[Warn]')} ${temp}`;
+                break;
+
+            case Level.error:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(
+                    this.name,
+                )} ${consoleColours.redBright('[Error]')} ${temp}`;
+                break;
+
+            case Level.fatal:
+                msg = `${consoleColours.grey(
+                    getTime(),
+                )} ${consoleColours.underline(
+                    this.name,
+                )} ${consoleColours.bgRed('[Fatal]')} ${temp}`;
+                break;
+            // Additional cases for other levels can be added here
+            default:
+                return; // Do nothing if level is not handled
+        }
+
+        console.log(msg);
     }
 
-    public trace(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
-
-        return this.log(consoleColours.blue`[Trace]`, message, data)
-        // console.log(consoleColours.blue`[Trace]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * trace
+     * @description Log a trace
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async trace(...data: Array<any>): Promise<void> {
+        return await this.log(Level.trace, ...data);
     }
-    public debug(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
-
-        return this.log(consoleColours.cyan`[Debug]`, message, data)
-        // console.log(consoleColours.cyan`[Debug]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * debug
+     * @description Log a debug line
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async debug(...data: Array<any>): Promise<void> {
+        return await this.log(Level.debug, ...data);
     }
-    public info(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        return this.log(consoleColours.blueBright`[Info]`, message, data)
-        // console.log(consoleColours.blueBright`[Info]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * info
+     * @description Log a info line
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async info(...data: Array<any>): Promise<void> {
+        return await this.log(Level.info, ...data);
     }
-    public warn(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        return this.log(consoleColours.yellow`[Warn]`, message, data)
-        // console.log(consoleColours.yellow`[Warn]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * warn
+     * @description Log a warning
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async warn(...data: Array<any>): Promise<void> {
+        return await this.log(Level.warn, ...data);
     }
-    public error(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        return this.log(consoleColours.red`[Error]`, message, data)
-        // console.log(consoleColours.red`[Error]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * error
+     * @description Log a error
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async error(...data: Array<any>): Promise<void> {
+        return await this.log(Level.error, ...data);
     }
-    public fatal(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
 
-        return this.log(consoleColours.redBG`[Fatal]`, message, data)
-        // console.log(consoleColours.redBG`[Fatal]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`));
+    /**
+     * fatal
+     * @description Log a fatal error
+     * @argument data { Array<any> } Pass data or messages to log
+     */
+    public async fatal(...data: Array<any>): Promise<void> {
+        return await this.log(Level.fatal, ...data);
     }
+
     private internalLogging(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace) return;
+        if (this.options.logLevel && this.options.logLevel > Level.trace)
+            return;
 
-        return console.log(`\n` + consoleColours.greenBright`[Internal]` + " " + message + " " + consoleColours.green(`${JSON.stringify(data, null, this.indent)}`) + `\n`);
+        console.log(
+            consoleColours.greenBright`[Internal] ` +
+                message +
+                consoleColours.green(
+                    ` ${JSON.stringify(data, null, this.options.indent)}`,
+                ),
+        );
     }
 }

@@ -40,6 +40,6 @@
     },
     "dependencies": {
         "console-log-colors": "^0.5.0",
-        "pretty-format": "^29.7.0"
+        "json-colorizer": "^3.0.1"
     }
 }
