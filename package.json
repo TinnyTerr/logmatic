@@ -23,10 +23,6 @@
         "posttest": "rm -rf *.log */*.log */dist node_modules ; npm i ",
         "compile": "npm run pretest"
     },
-    "os": [
-        "linux-BUILDING-ONLY",
-        "universal-USE"
-    ],
     "devDependencies": {
         "@types/node": "18.19.30",
         "@typescript-eslint/eslint-plugin": "7.5.0",
