@@ -1,8 +1,6 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
 
-let formatOptions: object;
-
 export interface options {
     logLevel?: Level;
     suppressWarnings?: boolean;
@@ -127,10 +125,20 @@ export class logger implements config {
             .map((element) => {
                 if (typeof element === 'string') {
                     return element;
-                } else if (typeof element === 'object') {
+                } else if (
+                    typeof element === 'object' &&
+                    this.options.format === true
+                ) {
                     return colorize(JSON.stringify(element), {
                         indent: this.options.indent,
                     });
+                } else if (typeof element === 'object') {
+                    return (
+                        JSON.stringify(element),
+                        {
+                            indent: this.options.indent,
+                        }
+                    );
                 } else {
                     return String(element);
                 }
