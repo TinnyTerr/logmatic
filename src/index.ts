@@ -133,7 +133,8 @@ export class logger implements config {
                 break;
             // Additional cases for other levels can be added here
             default:
-                return; // Do nothing if level is not handled
+                this.internalLogging('No log level provided');
+                throw new Error('No log level provided');
         }
 
         console.log(msg);
