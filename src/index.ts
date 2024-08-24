@@ -83,39 +83,6 @@ export class logger implements config {
             this.internalLogging(
                 'Warning, name contains ANSI characters. May affect colouring in the terminal',
             );
-
-        /*let lvlIndent: number = 0;
-
-        this.internalLogging('Log Level is current erroring out and defaults to trace');
-
-        if (!options) options = { logLevel: Level.debug };
-        else {
-            if (!options.logLevel === undefined) {
-                options.logLevel === Level.debug;
-            }
-            if (options.indent === undefined) lvlIndent === 0;
-            // * NO MORE DO WE HAVE THE INDENTATION WARNING WHOOOOOH
-        }
-        if (options.suppressWarnings === false) {
-            if (name.length > 15) throw new Error('Name invalid. Check the FAQ');
-            const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
-            const matches = name.match(ansiRegex) ?? [];
-            if (matches.length > 0) throw new Error('ANSI characters in name found.');
-        }
-
-        this.options = options?.options;
-        if (options.indent && options.indent > 0) {
-            formatOptions = {
-                highlight: true,
-                indent: options.indent,
-            };
-        } else {
-            formatOptions = {
-                highlight: true,
-                min: true,
-            };
-        }
-        this.name = `${name}`;*/
     }
 
     private async log(level: Level, ...data: Array<any>): Promise<void> {
