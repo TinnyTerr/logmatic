@@ -87,9 +87,9 @@ export class logger implements config {
             case Level.trace:
                 msg = `${consoleColours.grey(
                     getTime(),
-                )} ${consoleColours.underline(this.name)}${consoleColours.blue(
-                    ' [Trace] ',
-                )}${temp}`;
+                )} ${consoleColours.underline(this.name)} ${consoleColours.blue(
+                    '[Trace]',
+                )} ${temp}`;
                 break;
 
             case Level.debug:
