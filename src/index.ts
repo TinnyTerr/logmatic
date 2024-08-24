@@ -1,7 +1,7 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
 import { config, options, Level } from './types';
-import { getTime } from './getTime';
+import { getTime } from './utils';
 
 export class logger implements config {
     name: string = '';
