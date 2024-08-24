@@ -1,38 +1,7 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
-
-export interface options {
-    logLevel?: Level;
-    suppressWarnings?: boolean;
-    quitOnFatal?: boolean;
-    format?: boolean;
-    indent?: number | boolean;
-}
-
-interface config {
-    options: {
-        logLevel: Level;
-        suppressWarnings: boolean;
-        quitOnFatal: boolean;
-        format: boolean;
-        indent: number;
-    };
-}
-
-enum Level {
-    trace,
-    debug,
-    info,
-    warn,
-    error,
-    fatal,
-}
-
-function getTime(): string {
-    const now = new Date();
-    const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    return date.toISOString().replace(/.*T(.*)Z/, '$1');
-}
+import { config, options, Level } from './types';
+import { getTime } from './getTime';
 
 export class logger implements config {
     name: string = '';
