@@ -14,27 +14,28 @@
     },
     "exports": {
         "import": "./dist/es6/index.mjs",
-        "require": "./dist/commonjs/index.cjs"
+        "require": "./dist/commonjs/index.cjs",
+        "default": "./dist/index.js"
     },
     "types": "./dist/index.d.ts",
     "scripts": {
-        "pretest": " npx tsc --outDir ./dist/es6 -m es6 ; npx tsc --outDir ./dist/commonjs -m commonjs ; mv ./dist/es6/index.js ./dist/es6/index.mjs ; mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs ; npx tsc --emitDeclarationOnly",
-        "test": "node tests/test.cjs ; node tests/test.mjs",
-        "posttest": "rm -rf *.log */*.log */dist node_modules ; npm i ",
-        "compile": "npm run pretest"
+        "build": "npx tsc --outDir ./dist/es6 -m es6 && npx tsc --outDir ./dist/commonjs -m commonjs && npx tsc --emitDeclarationOnly && mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs && mv ./dist/es6/index.js ./dist/es6/index.mjs",
+        "clean": "rm -rf *.log */*.log dist node_modules",
+        "compile": "npm run clean && npm i && npm run prestart",
+        "prestart": "npm run lint && npm run build",
+        "lint": "rm -rf dist && npx eslint --fix && npx prettier . -w"
     },
     "devDependencies": {
-        "@types/node": "18.19.30",
-        "@typescript-eslint/eslint-plugin": "7.5.0",
-        "@typescript-eslint/parser": "7.5.0",
-        "eslint": "8.57.0",
-        "eslint-config-prettier": "9.1.0",
-        "eslint-plugin-jest": "27.9.0",
-        "eslint-plugin-prettier": "4.2.1",
-        "eslint-plugin-simple-import-sort": "12.0.0",
-        "eslint-plugin-sort-class-members": "1.20.0",
-        "prettier": "2.8.8",
-        "typescript": "5.4.4"
+        "@eslint/js": "^9.9.0",
+        "@types/eslint": "^9.6.0",
+        "@types/eslint__js": "^8.42.3",
+        "@types/estree": "^1.0.5",
+        "@types/json-schema": "^7.0.15",
+        "@types/node": "^18.19.30",
+        "eslint": "^9.9.0",
+        "globals": "^15.9.0",
+        "prettier": "3.3.3",
+        "typescript": "^5.4.4"
     },
     "dependencies": {
         "console-log-colors": "^0.5.0",
