@@ -53,6 +53,6 @@ module.exports = [
         },
     },
     {
-        ignores: ['dist/*', '.vs/*'],
+        ignores: ['dist/*'],
     },
 ];
