@@ -306,7 +306,7 @@ export class logger implements config {
 			})
 			.join(' ');
 
-		let msg = prefix + `${temp}`;
+		let msg = prefix + ` ${temp}`;
 
 		if (level === Level.fatal && this.options.quitOnFatal === true) {
 			console.log(msg);
@@ -324,14 +324,14 @@ export class logger implements config {
 	 * @argument data { Array<any> } Pass data or messages to log
 	 */
 	public async trace(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.trace,
 			`${consoleColours.grey(
-				getTime(),
+				getTime()
 			)} ${consoleColours.underline(this.name)} ${consoleColours.blue(
-				'[Trace]',
+				'[Trace]'
 			)}`,
-			...data,
+			...data
 		);
 	}
 
@@ -341,14 +341,14 @@ export class logger implements config {
 	 * @returns {void} log
 	 */
 	public async debug(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.debug,
 			`${consoleColours.grey(
-				getTime(),
+				getTime()
 			)} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
-				'[Debug]',
+				'[Debug]'
 			)}`,
-			...data,
+			...data
 		);
 	}
 
@@ -358,12 +358,12 @@ export class logger implements config {
 	 * @returns {void} log
 	 */
 	public async info(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.info,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
+				this.name
 			)} ${consoleColours.blueBright('[Info]')}`,
-			...data,
+			...data
 		);
 	}
 
@@ -373,12 +373,12 @@ export class logger implements config {
 	 * @returns {void} log
 	 */
 	public async warn(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.warn,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
+				this.name
 			)} ${consoleColours.yellow('[Warn]')}`,
-			...data,
+			...data
 		);
 	}
 
@@ -388,12 +388,12 @@ export class logger implements config {
 	 * @returns {void} log
 	 */
 	public async error(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.error,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
+				this.name
 			)} ${consoleColours.redBright('[Error]')}`,
-			...data,
+			...data
 		);
 	}
 
@@ -403,12 +403,12 @@ export class logger implements config {
 	 * @returns {void} log
 	 */
 	public async fatal(...data: Array<any>): Promise<void> {
-		return await this.log(
+		return this.log(
 			Level.fatal,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
+				this.name
 			)} ${consoleColours.bgRed('[Fatal]')}`,
-			...data,
+			...data
 		);
 	}
 
