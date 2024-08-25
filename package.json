@@ -1,44 +1,44 @@
 {
-    "name": "logmatic",
-    "version": "1.4.2",
-    "homepage": "https://github.com/tinnyterr/logmatic#readme",
-    "bugs": {
-        "url": "https://github.com/tinnyterr/logmatic/issues"
-    },
-    "license": "MPL-2.0",
-    "author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
-    "main": "./dist/index.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/tinnyterr/logmatic.git"
-    },
-    "exports": {
-        "import": "./dist/es6/index.mjs",
-        "require": "./dist/commonjs/index.cjs",
-        "default": "./dist/index.js"
-    },
-    "types": "./dist/index.d.ts",
-    "scripts": {
-        "build": "npx tsc --outDir ./dist/es6 -m es6 && npx tsc --outDir ./dist/commonjs -m commonjs && npx tsc --emitDeclarationOnly && mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs && mv ./dist/es6/index.js ./dist/es6/index.mjs",
-        "clean": "rm -rf *.log */*.log dist node_modules",
-        "compile": "npm run clean && npm i && npm run prestart",
-        "prestart": "npm run lint && npm run build",
-        "lint": "rm -rf dist && npx eslint --fix && npx prettier . -w"
-    },
-    "devDependencies": {
-        "@eslint/js": "^9.9.0",
-        "@types/eslint": "^9.6.0",
-        "@types/eslint__js": "^8.42.3",
-        "@types/estree": "^1.0.5",
-        "@types/json-schema": "^7.0.15",
-        "@types/node": "^18.19.30",
-        "eslint": "^9.9.0",
-        "globals": "^15.9.0",
-        "prettier": "3.3.3",
-        "typescript": "^5.4.4"
-    },
-    "dependencies": {
-        "console-log-colors": "^0.5.0",
-        "json-colorizer": "^3.0.1"
-    }
+	"name": "logmatic",
+	"version": "1.4.2",
+	"homepage": "https://github.com/tinnyterr/logmatic#readme",
+	"bugs": {
+		"url": "https://github.com/tinnyterr/logmatic/issues"
+	},
+	"license": "MPL-2.0",
+	"author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
+	"main": "./dist/index.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tinnyterr/logmatic.git"
+	},
+	"exports": {
+		"import": "./dist/es6/index.mjs",
+		"require": "./dist/commonjs/index.cjs",
+		"default": "./dist/index.js"
+	},
+	"types": "./dist/index.d.ts",
+	"scripts": {
+		"build": "npx tsc --outDir ./dist/es6 -m es6 && npx tsc --outDir ./dist/commonjs -m commonjs && npx tsc --emitDeclarationOnly && mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs && mv ./dist/es6/index.js ./dist/es6/index.mjs",
+		"clean": "rm -rf *.log */*.log dist node_modules",
+		"compile": "npm run clean && npm i && npm run prestart",
+		"prestart": "npm run lint && npm run build",
+		"lint": "rm -rf dist && npx eslint --fix && npx prettier . -w"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.9.0",
+		"@types/eslint": "^9.6.0",
+		"@types/eslint__js": "^8.42.3",
+		"@types/estree": "^1.0.5",
+		"@types/json-schema": "^7.0.15",
+		"@types/node": "^18.19.30",
+		"eslint": "^9.9.0",
+		"globals": "^15.9.0",
+		"prettier": "3.3.3",
+		"typescript": "^5.4.4"
+	},
+	"dependencies": {
+		"console-log-colors": "^0.5.0",
+		"json-colorizer": "^3.0.1"
+	}
 }

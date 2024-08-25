@@ -1,16 +1,16 @@
 {
-    "compilerOptions": {
-        "declaration": true,
-        "module": "ES6",
-        "target": "ES2020",
-        "moduleResolution": "Node",
-        "outDir": "./dist",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "types": ["node", "eslint", "eslint__js", "estree", "json-schema"]
-    },
-    "include": ["src/*"],
-    "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"declaration": true,
+		"module": "ES6",
+		"target": "ES2020",
+		"moduleResolution": "Node",
+		"outDir": "./dist",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "eslint", "eslint__js", "estree", "json-schema"]
+	},
+	"include": ["src/*"],
+	"exclude": ["node_modules", "dist"]
 }

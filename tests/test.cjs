@@ -61,9 +61,9 @@ formatLog.fatal('test fatal');
 formatLog.fatal('test fatal with data', { thisIs: true, andNot: false });
 
 const formatLogIndent = new logger('formatLogIndent', {
-    logLevel: 0,
-    indent: 4,
-    format: true,
+	logLevel: 0,
+	indent: 4,
+	format: true,
 });
 
 formatLogIndent.trace('test trace');
