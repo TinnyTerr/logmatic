@@ -33,6 +33,10 @@ export interface options {
 	 * @type {number}
 	 */
 	indent?: number | boolean;
+	/**
+	 * If the logger should
+	 */
+	loggerVerbose?: boolean;
 }
 
 /**
@@ -272,28 +276,6 @@ export class logger implements config {
 		this.options = Options;
 		//@ts-expect-error - See above comment
 		this.files = Files;
-		/*if (!options) {
-			this.options = {
-				logLevel: 1,
-				suppressWarnings: false,
-				quitOnFatal: false,
-				format: false,
-				indent: 0,
-			};
-		} else {
-			this.options.logLevel = options.logLevel ?? 1;
-			this.options.suppressWarnings = options.suppressWarnings ?? false;
-			this.options.quitOnFatal = options.quitOnFatal ?? false;
-			this.options.format = options.format ?? false;
-			if (options.indent === false) this.options.indent = 0;
-			else if (options.indent === true) this.options.indent = 4;
-			else if (
-				typeof options.indent === 'number' ||
-				typeof options.indent === 'undefined'
-			)
-				this.options.indent = options.indent ?? 0;
-			else throw new TypeError('Indentation option is not a valid type');
-		}*/
 
 		const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
 		const matches = name.match(ansiRegex) ?? [];
@@ -336,86 +318,6 @@ export class logger implements config {
 		return console.log(msg);
 	}
 
-	/*private log(level: Level, ...data: Array<any>): void {
-		if (this.options.logLevel > level) return;
-
-		const temp = data
-			.map((d) => {
-				if (typeof d === 'object' && this.options.format === true) {
-					return colorize(
-						JSON.stringify(d, null, this.options.indent),
-					);
-				} else if (typeof d === 'object') {
-					return JSON.stringify(d, null, this.options.indent);
-				} else return d;
-			})
-			.join(' ');
-
-		let msg = '';
-
-		switch (level) {
-			case Level.trace:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(this.name)} ${consoleColours.blue(
-					'[Trace]',
-				)}` ${temp}`;
-				break;
-
-			case Level.debug:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
-					'[Debug]',
-				)}` ${temp}`;
-				break;
-
-			case Level.info:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(
-					this.name,
-				)} ${consoleColours.blueBright('[Info]')}` ${temp}`;
-				break;
-
-			case Level.warn:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(
-					this.name,
-				)} ${consoleColours.yellow('[Warn]')}` ${temp}`;
-				break;
-
-			case Level.error:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(
-					this.name,
-				)} ${consoleColours.redBright('[Error]')}` ${temp}`;
-				break;
-
-			case Level.fatal:
-				msg = `${consoleColours.grey(
-					getTime(),
-				)} ${consoleColours.underline(
-					this.name,
-				)} ${consoleColours.bgRed('[Fatal]')}` ${temp}`;
-
-				if (this.options.quitOnFatal) {
-					console.log(msg);
-					process.exit(1);
-				}
-
-				break;
-			// Additional cases for other levels can be added here
-			default:
-				this.internalLogging('No log level provided');
-				throw new Error('No log level provided');
-		}
-
-		console.log(msg);
-	}
-
 	/**
 	 * trace
 	 * @description Log a trace
@@ -432,10 +334,11 @@ export class logger implements config {
 			...data,
 		);
 	}
+
 	/**
-	 * debug
-	 * @description Log a debug line
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * Log a debug statement
+	 * @param data Any data you want to log
+	 * @returns {void} log
 	 */
 	public async debug(...data: Array<any>): Promise<void> {
 		return await this.log(
@@ -450,9 +353,9 @@ export class logger implements config {
 	}
 
 	/**
-	 * info
-	 * @description Log a info line
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * Log a info statement
+	 * @param data Any data you want to log
+	 * @returns {void} log
 	 */
 	public async info(...data: Array<any>): Promise<void> {
 		return await this.log(
@@ -465,9 +368,9 @@ export class logger implements config {
 	}
 
 	/**
-	 * warn
-	 * @description Log a warning
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * Log a warning
+	 * @param data Any data you want to log
+	 * @returns {void} log
 	 */
 	public async warn(...data: Array<any>): Promise<void> {
 		return await this.log(
@@ -480,9 +383,9 @@ export class logger implements config {
 	}
 
 	/**
-	 * error
-	 * @description Log a error
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * Log a error
+	 * @param data Any data you want to log
+	 * @returns {void} log
 	 */
 	public async error(...data: Array<any>): Promise<void> {
 		return await this.log(
@@ -495,9 +398,9 @@ export class logger implements config {
 	}
 
 	/**
-	 * fatal
-	 * @description Log a fatal error
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * Log a fatal error
+	 * @param data Any data you want to log
+	 * @returns {void} log
 	 */
 	public async fatal(...data: Array<any>): Promise<void> {
 		return await this.log(
