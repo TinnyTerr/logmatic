@@ -1,13 +1,13 @@
-import consoleColours from 'console-log-colors';
-import { colorize } from 'json-colorizer';
+import consoleColours from "console-log-colors";
+import { colorize } from "json-colorizer";
 
 export function getTime(): string {
 	const now = new Date();
 	const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-	return date.toISOString().replace(/.*T(.*)Z/, '$1');
+	return date.toISOString().replace(/.*T(.*)Z/, "$1");
 }
 
-export interface options {
+export interface Options {
 	/**
 	 * The level of logging to be used.
 	 * @type {Level}
@@ -34,7 +34,8 @@ export interface options {
 	 */
 	indent?: number | boolean;
 	/**
-	 * If the logger should
+	 * If the logger should log what it is doing
+	 *
 	 */
 	loggerVerbose?: boolean;
 }
@@ -42,7 +43,7 @@ export interface options {
 /**
  * The files object is here to set the default options for file logging.
  */
-export interface fileOptions {
+export interface FileOptions {
 	/**
 	 * Whether file logging is enabled.
 	 * @type {boolean}
@@ -92,20 +93,20 @@ export interface fileOptions {
 	/**
 	 * The type is the type of file that the logs will be saved to.
 	 */
-	type?: 'json' | 'txt' | 'log' | null;
+	type?: "json" | "txt" | "log" | null;
 }
 
-export interface userOptions {
-	options?: options;
-	files?: fileOptions;
+export interface UserOptions {
+	options?: Options;
+	files?: FileOptions;
 }
 
-export interface config {
+export interface Config {
 	/**
 	 * The options object is here to set the default options for the logger.
 	 *
 	 * The above options interface is not used as the options object is optional where the config is filled if values are empty in the class.
-	 * @see {@link options}
+	 * @see {@link Options}
 	 */
 	options: {
 		/**
@@ -133,6 +134,7 @@ export interface config {
 		 * @type {number}
 		 */
 		indent: number;
+		loggerVerbose: boolean;
 	};
 	/**
 	 * The files object is here to set the default options for file logging.
@@ -188,31 +190,32 @@ export interface config {
 		 * The type of log files to be generated.
 		 * @type {'json' | 'txt' | 'log' | null}
 		 */
-		type: 'json' | 'txt' | 'log' | null;
+		type: "json" | "txt" | "log" | null;
 	};
 }
 /**
  * The Level enum is here to set the levels of logs that can be thrown.
  */
 export enum Level {
-	trace,
-	debug,
-	info,
-	warn,
-	error,
-	fatal,
+	Trace = 0,
+	Debug = 1,
+	Info = 2,
+	Warn = 3,
+	Error = 4,
+	Fatal = 5,
 }
 
-export class logger implements config {
-	name: string = '';
-	options: config['options'] = {
+export class Logger implements Config {
+	name = "";
+	options: Config["options"] = {
 		logLevel: 1,
 		suppressWarnings: false,
 		quitOnFatal: false,
 		format: false,
 		indent: 0,
+		loggerVerbose: false,
 	};
-	files: config['files'] = {
+	files: Config["files"] = {
 		enabled: false,
 		noConsole: null,
 		path: null,
@@ -220,38 +223,45 @@ export class logger implements config {
 		type: null,
 	};
 
-	constructor(name: string, options?: options, files?: fileOptions) {
+	constructor(name: string, options?: Options, files?: FileOptions) {
 		// Define config
 		this.name = `${name}`;
 
 		//* Setback option definitions to set values
-		let Options: options = {};
-		let Files: fileOptions = {};
+		let Options: Options = {};
+		let Files: FileOptions = {};
 
-		if (!options) {
+		if (options) {
+			Options = {
+				logLevel: options.logLevel ?? 1,
+				suppressWarnings: options.suppressWarnings ?? false,
+				quitOnFatal: options.quitOnFatal ?? false,
+				format: options.format ?? false,
+				loggerVerbose: options.loggerVerbose ?? false,
+			};
+
+			if (options.indent === false) {
+				Options.indent = 0;
+			} else if (options.indent === true) {
+				Options.indent = 4;
+			} else if (typeof options.indent === "number") {
+				this.options.indent = options.indent;
+			} else {
+				this.options.indent = 0;
+			}
+		} else {
 			this.options = {
 				logLevel: 1,
 				suppressWarnings: false,
 				quitOnFatal: false,
 				format: false,
 				indent: 0,
+				loggerVerbose: false,
 			};
-		} else {
-			Options = {
-				logLevel: options.logLevel ?? 1,
-				suppressWarnings: options.suppressWarnings ?? false,
-				quitOnFatal: options.quitOnFatal ?? false,
-				format: options.format ?? false,
-			};
+		}
 
-			if (options.indent === false) Options.indent = 0;
-			else if (options.indent === true) Options.indent = 4;
-			else if (
-				typeof options.indent === 'number' ||
-				typeof options.indent === 'undefined'
-			)
-				this.options.indent = options.indent ?? 0;
-			else throw new TypeError('Indentation option is not a valid type');
+		if (Options.format === true && Options.indent === 0) {
+			this.internalLogging("Indent cannot be 0 when formatting is true");
 		}
 
 		if (!files || files.enabled === false) {
@@ -267,8 +277,8 @@ export class logger implements config {
 				enabled: true,
 				noConsole: files.noConsole ?? null,
 				path: files.path ?? null,
-				naming: files.naming ?? '',
-				type: files.type ?? 'log',
+				naming: files.naming ?? "",
+				type: files.type ?? "log",
 			};
 		}
 
@@ -277,14 +287,16 @@ export class logger implements config {
 		//@ts-expect-error - See above comment
 		this.files = Files;
 
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: This form is how ANSI colouring text is input, therefore we must test for it manually
 		const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
 		const matches = name.match(ansiRegex) ?? [];
-		if (matches.length > 0 && this.options.suppressWarnings === false)
-			throw new Error('ANSI characters in name found.');
-		else if (matches.length > 0)
+		if (matches.length > 0 && this.options.suppressWarnings === false) {
+			throw new Error("ANSI characters in name found.");
+		} else if (matches.length > 0 && this.options.suppressWarnings === true) {
 			this.internalLogging(
-				'Warning, name contains ANSI characters. May affect colouring in the terminal',
+				"Warning, name contains ANSI characters. May affect colouring in the terminal",
 			);
+		}
 	}
 
 	/**
@@ -296,19 +308,29 @@ export class logger implements config {
 	private log(level: Level, prefix: string, ...data: any[]): void {
 		const temp = data
 			.map((d) => {
-				if (typeof d === 'object' && this.options.format === true) {
-					return colorize(
-						JSON.stringify(d, null, this.options.indent),
-					);
-				} else if (typeof d === 'object') {
-					return JSON.stringify(d, null, this.options.indent);
-				} else return d;
+				if (typeof d === "object" && this.options.format === true) {
+					if (this.options.indent === 0) {
+						return colorize(JSON.stringify(d, null, 0), {
+							indent: 0,
+						});
+					} else {
+						return colorize(JSON.stringify(d, null, this.options.indent));
+					}
+				} else if (typeof d === "object") {
+					if (this.options.indent === 0) {
+						return JSON.stringify(d, null, 0);
+					} else {
+						return JSON.stringify(d, null, this.options.indent);
+					}
+				} else {
+					return d;
+				}
 			})
-			.join(' ');
+			.join(" ");
 
-		let msg = prefix + ` ${temp}`;
+		const msg = `${prefix} ${temp}`;
 
-		if (level === Level.fatal && this.options.quitOnFatal === true) {
+		if (level === Level.Fatal && this.options.quitOnFatal === true) {
 			console.log(msg);
 
 			// Oooohhh Scaaaryyy!
@@ -321,17 +343,17 @@ export class logger implements config {
 	/**
 	 * trace
 	 * @description Log a trace
-	 * @argument data { Array<any> } Pass data or messages to log
+	 * @argument data { any[] } Pass data or messages to log
 	 */
-	public async trace(...data: Array<any>): Promise<void> {
+	public async trace(...data: any[]): Promise<void> {
 		return this.log(
-			Level.trace,
+			Level.Trace,
 			`${consoleColours.grey(
-				getTime()
+				getTime(),
 			)} ${consoleColours.underline(this.name)} ${consoleColours.blue(
-				'[Trace]'
+				"[Trace]",
 			)}`,
-			...data
+			...data,
 		);
 	}
 
@@ -340,15 +362,15 @@ export class logger implements config {
 	 * @param data Any data you want to log
 	 * @returns {void} log
 	 */
-	public async debug(...data: Array<any>): Promise<void> {
+	public async debug(...data: any[]): Promise<void> {
 		return this.log(
-			Level.debug,
+			Level.Debug,
 			`${consoleColours.grey(
-				getTime()
+				getTime(),
 			)} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
-				'[Debug]'
+				"[Debug]",
 			)}`,
-			...data
+			...data,
 		);
 	}
 
@@ -357,13 +379,13 @@ export class logger implements config {
 	 * @param data Any data you want to log
 	 * @returns {void} log
 	 */
-	public async info(...data: Array<any>): Promise<void> {
+	public async info(...data: any[]): Promise<void> {
 		return this.log(
-			Level.info,
+			Level.Info,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name
-			)} ${consoleColours.blueBright('[Info]')}`,
-			...data
+				this.name,
+			)} ${consoleColours.blueBright("[Info]")}`,
+			...data,
 		);
 	}
 
@@ -372,13 +394,13 @@ export class logger implements config {
 	 * @param data Any data you want to log
 	 * @returns {void} log
 	 */
-	public async warn(...data: Array<any>): Promise<void> {
+	public async warn(...data: any[]): Promise<void> {
 		return this.log(
-			Level.warn,
+			Level.Warn,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name
-			)} ${consoleColours.yellow('[Warn]')}`,
-			...data
+				this.name,
+			)} ${consoleColours.yellow("[Warn]")}`,
+			...data,
 		);
 	}
 
@@ -387,13 +409,13 @@ export class logger implements config {
 	 * @param data Any data you want to log
 	 * @returns {void} log
 	 */
-	public async error(...data: Array<any>): Promise<void> {
+	public async error(...data: any[]): Promise<void> {
 		return this.log(
-			Level.error,
+			Level.Error,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name
-			)} ${consoleColours.redBright('[Error]')}`,
-			...data
+				this.name,
+			)} ${consoleColours.redBright("[Error]")}`,
+			...data,
 		);
 	}
 
@@ -402,20 +424,17 @@ export class logger implements config {
 	 * @param data Any data you want to log
 	 * @returns {void} log
 	 */
-	public async fatal(...data: Array<any>): Promise<void> {
+	public async fatal(...data: any[]): Promise<void> {
 		return this.log(
-			Level.fatal,
+			Level.Fatal,
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name
-			)} ${consoleColours.bgRed('[Fatal]')}`,
-			...data
+				this.name,
+			)} ${consoleColours.bgRed("[Fatal]")}`,
+			...data,
 		);
 	}
 
-	private internalLogging(message: string, ...data: Array<unknown>) {
-		if (this.options.logLevel && this.options.logLevel > Level.trace)
-			return;
-
+	private internalLogging(message: string, ...data: unknown[]) {
 		console.log(
 			consoleColours.greenBright`[Internal] ` +
 				message +
