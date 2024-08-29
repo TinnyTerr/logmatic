@@ -19,7 +19,7 @@
 	},
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"build": "npx tsc --outDir ./dist/es6 -m es6 && npx tsc --outDir ./dist/commonjs -m commonjs && npx tsc --emitDeclarationOnly && mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs && mv ./dist/es6/index.js ./dist/es6/index.mjs",
+		"build": "npx tsc -p tsconfig.cjs.json && npx tsc -p tsconfig.es6.json && npx tsc -p tsconfig.json",
 		"clean": "rm -rf *.log */*.log dist node_modules",
 		"compile": "npm run clean && npm i && npm run prestart",
 		"prestart": "npm run lint && npm run build",
