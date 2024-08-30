@@ -7,7 +7,8 @@
 	},
 	"license": "MPL-2.0",
 	"author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
-	"main": "./dist/index.js",
+	"main": "./dist/cjs/index.js",
+	"module": "./dist/esm/index.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tinnyterr/logmatic.git"
