@@ -1,20 +1,12 @@
 {
 	"compilerOptions": {
-		"baseUrl": "./",
-		"target": "ES5",
-		"declaration": true,
-		"strict": true,
 		"outDir": "./dist",
-		"esModuleInterop": true,
-		"emitDeclarationOnly": true,
+		"paths": { "_": ["./node_module"] },
 		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"types": ["node"],
-		"paths": {
-			"*": ["node_modules/*"]
-		},
-		"moduleResolution": "node"
+		"emitDeclarationOnly": true,
+		"declaration": true,
+		"esModuleInterop": true
 	},
-	"include": ["src/*"],
-	"exclude": ["node_modules", "dist"]
+	"include": ["src"],
+	"exclude": ["tsup*", "node_modules"]
 }

@@ -7,20 +7,17 @@
 	},
 	"license": "MPL-2.0",
 	"author": "Lewis McDonald <l.mcdonald@dmnet.uk> (https://e-z.bio/tinnyterr)",
-	"main": "./dist/cjs/index.js",
-	"module": "./dist/esm/index.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tinnyterr/logmatic.git"
 	},
 	"exports": {
 		"import": "./dist/es6/index.mjs",
-		"require": "./dist/commonjs/index.cjs",
-		"default": "./dist/index.js"
+		"require": "./dist/cjs/index.js"
 	},
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"build": "npx tsc -p tsconfig.cjs.json && npx tsc -p tsconfig.es6.json && npx tsc -p tsconfig.json",
+		"build": "npx tsup --format esm -d dist/esm && npx tsup --format cjs -d dist/cjs && npx tsc",
 		"clean": "rm -rf *.log */*.log dist node_modules",
 		"compile": "npm run clean && npm i && npm run prestart",
 		"prestart": "npm run lint && npm run build",
@@ -29,15 +26,13 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
-		"@eslint/js": "^9.9.0",
-		"@types/eslint": "^9.6.0",
-		"@types/eslint__js": "^8.42.3",
 		"@types/estree": "^1.0.5",
 		"@types/json-schema": "^7.0.15",
 		"@types/node": "^18.19.30",
 		"eslint": "^9.9.0",
 		"globals": "^15.9.0",
 		"prettier": "3.3.3",
+		"tsup": "^8.2.4",
 		"typescript": "^5.4.4"
 	},
 	"dependencies": {
