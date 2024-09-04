@@ -1,5 +1,8 @@
 import consoleColours from "console-log-colors";
+import { open } from "node:fs/promises";
 import { colorize } from "json-colorizer";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 export interface Options {
 	/**
@@ -442,5 +445,20 @@ export class Logger implements Config {
 					` ${JSON.stringify(data, null, this.options.indent)}`,
 				),
 		);
+	}
+}
+
+class FileHandler {
+	fileOptions: FileOptions = {};
+	constructor(fileOptions: FileOptions) {
+		this.fileOptions = fileOptions;
+
+		if (typeof require === "undefined" && typeof module === "undefined") {
+			//@ts-expect-error
+			const __filename = fileURLToPath(import.meta.url);
+			const __dirname = dirname(__filename);
+		}
+
+		open(join(__dirname));
 	}
 }
