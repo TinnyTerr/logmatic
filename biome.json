@@ -43,7 +43,8 @@
 				"useBlockStatements": "error",
 				"useCollapsedElseIf": "error",
 				"useConst": "error",
-				"noUselessElse": "off"
+				"noUselessElse": "off",
+				"noDefaultExport": "off"
 			},
 			"suspicious": {
 				"noAssignInExpressions": "error",
