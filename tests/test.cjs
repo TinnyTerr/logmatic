@@ -1,4 +1,4 @@
-const { Logger } = require("../dist/commonjs/index.cjs");
+const { Logger } = require("../dist/cjs/index.cjs");
 
 const log = new Logger("log", { logLevel: 0 });
 
