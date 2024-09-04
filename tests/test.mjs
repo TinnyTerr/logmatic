@@ -1,4 +1,4 @@
-import { Logger } from "../dist/es6/index.mjs";
+import { Logger } from "../dist/esm/index.mjs";
 
 const log = new Logger("log", { logLevel: 0 });
 
