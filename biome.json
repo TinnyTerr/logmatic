@@ -40,7 +40,7 @@
 			"style": {
 				"all": true,
 				"noVar": "error",
-				"useBlockStatements": "error",
+				"useBlockStatements": "off",
 				"useCollapsedElseIf": "error",
 				"useConst": "error",
 				"noUselessElse": "off",

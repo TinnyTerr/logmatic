@@ -1,206 +1,12 @@
 import consoleColours from "console-log-colors";
-import { open } from "node:fs/promises";
 import { colorize } from "json-colorizer";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-
-export interface Options {
-	/**
-	 * The level of logging to be used.
-	 * @type {Level}
-	 */
-	logLevel?: Level;
-	/**
-	 * Whether to suppress warnings in the loggers warnings.
-	 * @type {boolean}
-	 */
-	suppressWarnings?: boolean;
-	/**
-	 * Whether to quit the application on a fatal error.
-	 * @type {boolean}
-	 */
-	quitOnFatal?: boolean;
-	/**
-	 * Whether to format the logs.
-	 * @type {boolean}
-	 */
-	format?: boolean;
-	/**
-	 * The number of spaces to use for indentation in formatted logs.
-	 * @type {number}
-	 */
-	indent?: number | boolean;
-	/**
-	 * If the logger should log what it is doing
-	 *
-	 */
-	loggerVerbose?: boolean;
-}
-/**
- * The files object is here to set the default options for file logging.
- */
-
-export interface FileOptions {
-	/**
-	 * Whether file logging is enabled.
-	 * @type {boolean}
-	 */
-	enabled?: boolean;
-	/**
-	 * Whether to disable console logging when file logging is enabled.
-	 * @type {boolean | null}
-	 */
-	noConsole?: boolean | null;
-	/**
-	 * The path where log files will be saved.
-	 * @type {string | null}
-	 */
-	path?: string | null;
-	/**
-	 * The naming convention for log files.
-	 * @type {string | null}
-	 */
-	naming?: string | null;
-	/**
-	 * The format is the format of each line in the log file.
-	 * If the format is not set, the logs will be saved in the default format.
-	 *
-	 * The following terms will be replaced with the following values (ONLY FOR TXT AND LOG FORMATS):
-	 * - `{time}` - The time the log was created
-	 * - `{level}` - The level of the log
-	 * - `{message}` - The message of the log
-	 *
-	 * @example
-	 * ```json
-	 * [
-	 *  {
-	 *   "time": "2021-09-01T00:00:00.000Z",
-	 *   "level": "info",
-	 *   "message": "This is a log message"
-	 *  }
-	 * ]```
-	 * @example
-	 * ```txt
-	 * 2021-09-01T00:00:00.000Z [INFO] This is a log message```
-	 * @example
-	 * ```log
-	 * 2021-09-01T00:00:00.000Z [INFO] This is a log message```
-	 */
-	format?: string | null;
-	/**
-	 * The type is the type of file that the logs will be saved to.
-	 */
-	type?: "json" | "txt" | "log" | null;
-}
-
-export interface UserOptions {
-	options?: Options;
-	files?: FileOptions;
-}
-
-export interface Config {
-	/**
-	 * The options object is here to set the default options for the logger.
-	 *
-	 * The above options interface is not used as the options object is optional where the config is filled if values are empty in the class.
-	 * @see {@link Options}
-	 */
-	options: {
-		/**
-		 * The level of logging to be used.
-		 * @type {Level}
-		 */
-		logLevel: Level;
-		/**
-		 * Whether to suppress warnings in the loggers warnings.
-		 * @type {boolean}
-		 */
-		suppressWarnings: boolean;
-		/**
-		 * Whether to quit the application on a fatal error.
-		 * @type {boolean}
-		 */
-		quitOnFatal: boolean;
-		/**
-		 * Whether to format the logs.
-		 * @type {boolean}
-		 */
-		format: boolean;
-		/**
-		 * The number of spaces to use for indentation in formatted logs.
-		 * @type {number}
-		 */
-		indent: number;
-		loggerVerbose: boolean;
-	};
-	/**
-	 * The files object is here to set the default options for file logging.
-	 */
-	files: {
-		/**
-		 * Whether file logging is enabled.
-		 * @type {boolean}
-		 */
-		enabled: boolean;
-		/**
-		 * Whether to disable console logging when file logging is enabled.
-		 * @type {boolean | null}
-		 */
-		noConsole: boolean | null;
-		/**
-		 * The path where log files will be saved.
-		 * @type {string | null}
-		 */
-		path: string | null;
-		/**
-		 * The naming convention for log files.
-		 * @type {string | null}
-		 */
-		naming: string | null;
-		/**
-		 * The format is the format of each line in the log file.
-		 * If the format is not set, the logs will be saved in the default format.
-		 *
-		 * The following terms will be replaced with the following values (ONLY FOR TXT AND LOG FORMATS):
-		 * - `{time}` - The time the log was created
-		 * - `{level}` - The level of the log
-		 * - `{message}` - The message of the log
-		 *
-		 * @example
-		 * ```json
-		 * [
-		 *  {
-		 *   "time": "2021-09-01T00:00:00.000Z",
-		 *   "level": "info",
-		 *   "message": "This is a log message"
-		 *  }
-		 * ]```
-		 * @example
-		 * ```txt
-		 * 2021-09-01T00:00:00.000Z [INFO] This is a log message```
-		 * @example
-		 * ```log
-		 * 2021-09-01T00:00:00.000Z [INFO] This is a log message```
-		 */
-		format?: string | null;
-		/**
-		 * The type of log files to be generated.
-		 * @type {'json' | 'txt' | 'log' | null}
-		 */
-		type: "json" | "txt" | "log" | null;
-	};
-}
-/**
- * The Level enum is here to set the levels of logs that can be thrown.
- */
-export enum Level {
-	Trace = 0,
-	Debug = 1,
-	Info = 2,
-	Warn = 3,
-	Error = 4,
-	Fatal = 5,
-}
+import type {
+	Config,
+	ClassOptions,
+	FilesOptions,
+	Options,
+	UserOptions,
+} from "./types";
 
 export function getTime(): string {
 	const now = new Date();
@@ -208,108 +14,58 @@ export function getTime(): string {
 	return date.toISOString().replace(/.*T(.*)Z/, "$1");
 }
 
+() => {
+	const a = 1;
+	if (a === 1 || a !== 1) {
+		return;
+	}
+};
+
 export class Logger implements Config {
-	name = "";
-	options: Config["options"] = {
-		logLevel: 1,
-		suppressWarnings: false,
-		quitOnFatal: false,
+	readonly name: string;
+	options: Required<ClassOptions> = {
 		format: false,
 		indent: 0,
-		loggerVerbose: false,
+		logLevel: 1,
+		suppressLoggerWarning: false,
 	};
-	files: Config["files"] = {
-		enabled: false,
-		noConsole: null,
-		path: null,
-		naming: null,
-		type: null,
-	};
-
-	constructor(name: string, options?: Options, files?: FileOptions) {
-		// Define config
-		this.name = `${name}`;
-
-		//* Setback option definitions to set values
-		let Options: Options = {};
-		let Files: FileOptions = {};
-
-		if (options) {
-			Options = {
-				logLevel: options.logLevel ?? 1,
-				suppressWarnings: options.suppressWarnings ?? false,
-				quitOnFatal: options.quitOnFatal ?? false,
-				format: options.format ?? false,
-				loggerVerbose: options.loggerVerbose ?? false,
-			};
-
-			if (options.indent === false) {
-				Options.indent = 0;
-			} else if (options.indent === true) {
-				Options.indent = 4;
-			} else if (typeof options.indent === "number") {
-				this.options.indent = options.indent;
-			} else {
-				this.options.indent = 0;
-			}
-		} else {
-			this.options = {
-				logLevel: 1,
-				suppressWarnings: false,
-				quitOnFatal: false,
-				format: false,
-				indent: 0,
-				loggerVerbose: false,
-			};
+	files: Required<FilesOptions> | { enabled: false };
+	constructor(
+		name: string,
+		options?: Partial<UserOptions>,
+		files?: Partial<FilesOptions> | { enabled: false },
+	) {
+		if (!options && !files) {
+			this.name = name;
+			return;
 		}
 
-		if (Options.format === true && Options.indent === 0) {
-			this.internalLogging("Indent cannot be 0 when formatting is true");
+		if (options.indent === true) {
+			options.indent = 4;
 		}
 
-		if (!files || files.enabled === false) {
-			this.files = {
-				enabled: false,
-				noConsole: null,
-				path: null,
-				naming: null,
-				type: null,
-			};
-		} else {
-			Files = {
-				enabled: true,
-				noConsole: files.noConsole ?? null,
-				path: files.path ?? null,
-				naming: files.naming ?? "",
-				type: files.type ?? "log",
-			};
-		}
+		const optionsMap = new Map(Object.entries(options));
 
-		//@ts-expect-error - Compiler doesn't realise that Options and Files are defined above, no matter what.
-		this.options = Options;
-		//@ts-expect-error - See above comment
-		this.files = Files;
+		optionsMap.forEach((v, k) => {
+			if (typeof this.options[k] !== "undefined") this.options[k] = v;
+			else if (typeof this.files[k] !== "undefined") this.files[k] = v;
+			else throw new TypeError(`Value ${k} does not exist on options!`);
+		});
 
 		// biome-ignore lint/suspicious/noControlCharactersInRegex: This form is how ANSI colouring text is input, therefore we must test for it manually
 		const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
 		const matches = name.match(ansiRegex) ?? [];
-		if (matches.length > 0 && this.options.suppressWarnings === false) {
+		if (matches.length > 0 && this.options.suppressLoggerWarning === false) {
 			throw new Error("ANSI characters in name found.");
-		} else if (matches.length > 0 && this.options.suppressWarnings === true) {
-			this.internalLogging(
-				"Warning, name contains ANSI characters. May affect colouring in the terminal",
-			);
+		} else if (
+			matches.length > 0 &&
+			this.options.suppressLoggerWarning === true
+		) {
+			return;
 		}
 	}
-
-	/**
-	 * The logger parser for the data
-	 * @param prefix {string} The prefix of the logging
-	 * @param data {any[]} User provided data
-	 * @internal
-	 */
-	private log(level: Level, prefix: string, ...data: any[]): void {
-		const temp = data
+	private log(prefix: string, ...data: any[]) {
+		/*const temp = data
 			.map((d) => {
 				if (typeof d === "object" && this.options.format === true) {
 					if (this.options.indent === 0) {
@@ -329,136 +85,24 @@ export class Logger implements Config {
 					return d;
 				}
 			})
-			.join(" ");
+			.join(" ");*/
 
-		const msg = `${prefix} ${temp}`;
+		const dataMap = new Map(Object.entries(data));
 
-		if (level === Level.Fatal && this.options.quitOnFatal === true) {
-			console.log(msg);
+		let Data: string;
 
-			// Oooohhh Scaaaryyy!
-			process.exit(1);
-		}
+		dataMap.forEach((v) => {
+			if (typeof v === "object") {
+				if (this.options.format === true) {
+					Data += colorize(v, { indent: this.options.indent });
+				} else {
+					Data += JSON.stringify(v, null, this.options.indent);
+				}
+			} else {
+				Data += new String(v);
+			}
+		});
 
-		return console.log(msg);
-	}
-
-	/**
-	 * trace
-	 * @description Log a trace
-	 * @argument data { any[] } Pass data or messages to log
-	 */
-	public trace(...data: any[]): void {
-		return this.log(
-			Level.Trace,
-			`${consoleColours.grey(
-				getTime(),
-			)} ${consoleColours.underline(this.name)} ${consoleColours.blue(
-				"[Trace]",
-			)}`,
-			...data,
-		);
-	}
-
-	/**
-	 * Log a debug statement
-	 * @param data Any data you want to log
-	 * @returns {void} log
-	 */
-	public debug(...data: any[]): void {
-		return this.log(
-			Level.Debug,
-			`${consoleColours.grey(
-				getTime(),
-			)} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
-				"[Debug]",
-			)}`,
-			...data,
-		);
-	}
-
-	/**
-	 * Log a info statement
-	 * @param data Any data you want to log
-	 * @returns {void} log
-	 */
-	public info(...data: any[]): void {
-		return this.log(
-			Level.Info,
-			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
-			)} ${consoleColours.blueBright("[Info]")}`,
-			...data,
-		);
-	}
-
-	/**
-	 * Log a warning
-	 * @param data Any data you want to log
-	 * @returns {void} log
-	 */
-	public warn(...data: any[]): void {
-		return this.log(
-			Level.Warn,
-			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
-			)} ${consoleColours.yellow("[Warn]")}`,
-			...data,
-		);
-	}
-
-	/**
-	 * Log a error
-	 * @param data Any data you want to log
-	 * @returns {void} log
-	 */
-	public error(...data: any[]): void {
-		return this.log(
-			Level.Error,
-			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
-			)} ${consoleColours.redBright("[Error]")}`,
-			...data,
-		);
-	}
-
-	/**
-	 * Log a fatal error
-	 * @param data Any data you want to log
-	 * @returns {void} log
-	 */
-	public fatal(...data: any[]): void {
-		return this.log(
-			Level.Fatal,
-			`${consoleColours.grey(getTime())} ${consoleColours.underline(
-				this.name,
-			)} ${consoleColours.bgRed("[Fatal]")}`,
-			...data,
-		);
-	}
-
-	private internalLogging(message: string, ...data: unknown[]) {
-		console.log(
-			consoleColours.greenBright`[Internal] ` +
-				message +
-				consoleColours.green(
-					` ${JSON.stringify(data, null, this.options.indent)}`,
-				),
-		);
-	}
-}
-
-class FileHandler {
-	fileOptions: FileOptions = {};
-	constructor(fileOptions: FileOptions) {
-		this.fileOptions = fileOptions;
-
-		if (typeof require === "undefined" && typeof module === "undefined") {
-			//@ts-expect-error
-			const __filename = fileURLToPath(import.meta.url);
-			const __dirname = dirname(__filename);
-		}
-
-		open(join(__dirname));
+		return console.log(prefix, consoleColours.white(Data));
 	}
 }
