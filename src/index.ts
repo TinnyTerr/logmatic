@@ -1,25 +1,12 @@
 import consoleColours from "console-log-colors";
 import { colorize } from "json-colorizer";
-import type {
-	Config,
-	ClassOptions,
-	FilesOptions,
-	Options,
-	UserOptions,
-} from "./types";
+import type { ClassOptions, Config, FilesOptions, UserOptions } from "./types";
 
 export function getTime(): string {
 	const now = new Date();
 	const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 	return date.toISOString().replace(/.*T(.*)Z/, "$1");
 }
-
-() => {
-	const a = 1;
-	if (a === 1 || a !== 1) {
-		return;
-	}
-};
 
 export class Logger implements Config {
 	readonly name: string;
@@ -65,28 +52,6 @@ export class Logger implements Config {
 		}
 	}
 	private log(prefix: string, ...data: any[]) {
-		/*const temp = data
-			.map((d) => {
-				if (typeof d === "object" && this.options.format === true) {
-					if (this.options.indent === 0) {
-						return colorize(JSON.stringify(d, null, 0), {
-							indent: 0,
-						});
-					} else {
-						return colorize(JSON.stringify(d, null, this.options.indent));
-					}
-				} else if (typeof d === "object") {
-					if (this.options.indent === 0) {
-						return JSON.stringify(d, null, 0);
-					} else {
-						return JSON.stringify(d, null, this.options.indent);
-					}
-				} else {
-					return d;
-				}
-			})
-			.join(" ");*/
-
 		const dataMap = new Map(Object.entries(data));
 
 		let Data: string;
@@ -104,5 +69,97 @@ export class Logger implements Config {
 		});
 
 		return console.log(prefix, consoleColours.white(Data));
+	}
+	/**
+	 * Log a trace
+	 * @param data Any information to be logged
+	 */
+	public trace(...data: any[]) {
+		let log;
+		if (this.files.enabled === true) {
+			if (this.files.noConsole === false) {
+				log = this.log(
+					`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)}${consoleColours.blue(" [Trace] ")}`,
+					data,
+				);
+			}
+		}
+
+		return log;
+	}
+	/**
+	 * Log a debug
+	 * @param data Any information to be logged
+	 */
+	public debug(...data: any[]) {
+		return this.log(
+			`
+		${consoleColours.grey(
+			getTime(),
+		)} ${consoleColours.underline(this.name)}${consoleColours.cyan(
+			" [Debug] ",
+		)}`,
+			data,
+		);
+	}
+	/**
+	 * Log a info
+	 * @param data Any information to be logged
+	 */
+	public info(...data: any[]) {
+		return this.log(
+			`
+		${consoleColours.grey(
+			getTime(),
+		)} ${consoleColours.underline(this.name)}${consoleColours.blueBright(
+			" [Info] ",
+		)}`,
+			data,
+		);
+	}
+	/**
+	 * Log a warning
+	 * @param data Any information to be logged
+	 */
+	public warn(...data: any[]) {
+		return this.log(
+			`
+		${consoleColours.grey(
+			getTime(),
+		)} ${consoleColours.underline(this.name)}${consoleColours.yellow(
+			" [Warning] ",
+		)}`,
+			data,
+		);
+	}
+	/**
+	 * Log a error
+	 * @param data Any information to be logged
+	 */
+	public error(...data: any[]) {
+		return this.log(
+			`
+		${consoleColours.grey(
+			getTime(),
+		)} ${consoleColours.underline(this.name)}${consoleColours.redBright(
+			" [Error] ",
+		)}`,
+			data,
+		);
+	}
+	/**
+	 * Log a fatal
+	 * @param data Any information to be logged
+	 */
+	public fatal(...data: any[]) {
+		return this.log(
+			`
+		${consoleColours.grey(
+			getTime(),
+		)} ${consoleColours.underline(this.name)}${consoleColours.bgRed(
+			" [Fatal] ",
+		)}`,
+			data,
+		);
 	}
 }
