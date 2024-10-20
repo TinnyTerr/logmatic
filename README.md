@@ -43,15 +43,25 @@ new logger(/*!Name!*/, /*!Config!*/, /*!Files Config!*/);
 
 
 Name            - Name is the only required argument
-Config          - The config of how it logs. See [#Logging Config](#logging-config) ( [#Log level](#logging-config---log-level), [#Supress Warnings](#logging-config---supress-warnings), [#Formatting](#logging-config---formatting), [#Indentation](#logging-config---indentation) )
-Files Config    - The config of how it writes the log to files. See [#Files Config](#files-config)
+
+Config          - The config of how it logs. See [#Logging Config](#logging-config):
+- [#Log level](#logging-config---log-level)
+- [#Supress Warnings](#logging-config---supress-warnings)
+- [#Formatting](#logging-config---formatting)
+- [#Indentation](#logging-config---indentation)
+
+Files Config    - The config of how it writes the log to files. See [#Files Config](#files-config):
+- [#Enabled](#files-config---enabled), [#No Console](#files-config---no-console)
+- [#Path](#files-config---path)
+- [#Type](#files-config---type)
+- [#Naming](#files-config---naming)
 
 ### Logging Config
 
 #### Logging Config - Log level
 
 ```typescript
-logLevel?: Level;
+type logLevel = Level | undefined;
 ```
 
 Log level is the level that is emitted. Shown in the enum:
@@ -75,7 +85,7 @@ Select the level you wish output or None.
 #### Logging Config - Supress Warnings
 
 ```typescript
-suppressLoggerWarning?: boolean;
+type suppressLoggerWarning = boolean | undefined;
 ```
 
 Suppresses warnings output by the logger. Any error thrown while outputting is passed through to the original script.
@@ -87,7 +97,7 @@ Current errors supressed are:
 #### Logging Config - Formatting
 
 ```typescript
-format?: boolean;
+type format = boolean | undefined;
 ```
 
 Formatting the objects/arrays passed to the class.
@@ -98,9 +108,9 @@ Calls JSON.stringify or colourize using the object using the indentation provide
 #### Logging Config - Indentation
 
 ```typescript
-indent?: number | boolean;
+type indent = number | boolean | undefined;
 // Converted to
-indent?: number;
+type indent = number | undefined;
 // Within the constructor
 ```
 Indents objects/arrays passed to the class
@@ -113,7 +123,7 @@ Calls JSON.stringify and passes object and indentation and outputs it.
 #### Files Config - Enabled
 
 ```typescript
-enabled?: boolean;
+type enabled = boolean | undefined;
 ```
 
 If logging to file is enabled. If enabled is false, every other option is completely ignored and the package runs as normal
@@ -123,7 +133,7 @@ If logging to file is enabled. If enabled is false, every other option is comple
 #### Files Config - No Console
 
 ```typescript
-noConsole?: boolean | null;
+type noConsole = boolean | null | undefined;
 ```
 
 If this is true, stdout remains empty and does not output anything. This is ignored if the file it tries to log to failes to open and [#Suppress Warnings](#logging-config---supress-warnings) is true, else it errors out.
@@ -133,7 +143,7 @@ If this is true, stdout remains empty and does not output anything. This is igno
 #### Files Config - Path
 
 ```typescript
-path?: string | null;
+type path = string | null | undefined;
 ```
 
 Path is a string to a file, relative to the initial files root OR an absolute path provided (`../log/` OR `/workspaces/repo/log/`)
@@ -143,7 +153,7 @@ Path is a string to a file, relative to the initial files root OR an absolute pa
 #### Files Config - Naming
 
 ```typescript
-naming?: string | null;
+type naming = string | null | undefined;
 ```
 
 Naming is the scheme the filenames will follow. In the event that a file already exists, either an error is thrown or the file is deleted then written to again (See [#Suppress Warnings](#logging-config---supress-warnings))
@@ -153,7 +163,7 @@ Naming is the scheme the filenames will follow. In the event that a file already
 #### Files Config - Type
 
 ```typescript
-type?: "json" | "txt" | "log" | null;
+type type = "json" | "txt" | "log" | null | undefined;
 ```
 
 Type is the type of file that is written. txt and log files are written the same and json files are written as an array of type:
