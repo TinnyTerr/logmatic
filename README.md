@@ -68,13 +68,13 @@ Log level is the level that is emitted. Shown in the enum:
 
 ```typescript
 enum Level {
-	Trace = 0,
-	Debug = 1,
-	Info = 2,
-	Warn = 3,
-	Error = 4,
-	Fatal = 5,
-	None = 6,
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+    Fatal = 5,
+    None = 6,
 }
 ```
 
@@ -170,9 +170,9 @@ Type is the type of file that is written. txt and log files are written the same
 
 ```typescript
 interface FileFormat {
-	level: `${number}`; // See #LogLevel for level enum
-	date: `${string}`; // See getTime() in src/index.ts
-	data: `${string}`; // Stringified JSON or string/numbers
+    level: `${number}`; // See #LogLevel for level enum
+    date: `${string}`; // See getTime() in src/index.ts
+    data: `${string}`; // Stringified JSON or string/numbers
 }
 
 type File = FileFormat[]
