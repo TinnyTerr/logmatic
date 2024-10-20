@@ -1,6 +1,14 @@
 import consoleColours from "console-log-colors";
 import { colorize } from "json-colorizer";
-import type { ClassOptions, Config, FilesOptions, UserOptions } from "./types";
+import fs from "node:fs";
+import path from "node:path";
+import {
+	type ClassOptions,
+	type Config,
+	type FilesOptions,
+	Level,
+	type UserOptions,
+} from "./types";
 
 export function getTime(): string {
 	const now = new Date();
