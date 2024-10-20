@@ -31,8 +31,9 @@ export class Logger implements Config {
 		options?: Partial<UserOptions>,
 		files?: Partial<FilesOptions> | { enabled: false },
 	) {
+		this.name = name;
+
 		if (!options && !files) {
-			this.name = name;
 			return;
 		}
 
