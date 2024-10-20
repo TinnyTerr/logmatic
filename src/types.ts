@@ -1,7 +1,7 @@
 /**
  * The Level enum is here to set the levels of logs that can be thrown.
  */
-enum Level {
+export enum Level {
 	Trace = 0,
 	Debug = 1,
 	Info = 2,
@@ -48,7 +48,7 @@ export interface FilesOptions {
 	 * Whether file logging is enabled.
 	 * @type {boolean}
 	 */
-	enabled?: true;
+	enabled?: boolean;
 	/**
 	 * Whether to disable console logging when file logging is enabled.
 	 * @type {boolean | null}
@@ -62,11 +62,12 @@ export interface FilesOptions {
 	/**
 	 * Naming is the format of each file.
 	 * If the format is not set, the logs will be saved in the default format.
+	 * The file extention *WILL* be put on the file no matter what
 	 *
 	 * The following terms will be replaced with the following values:
 	 * - `{time}` - The time the log was created
 	 *
-	 * @example `{time}` = `2021-09-0100:00:00.000`
+	 * @example `{time}` = `2021-09-0100:00:00.000.(json|log|txt)`
 	 */
 	naming?: string | null;
 	/**
