@@ -58,15 +58,72 @@ export class Logger implements Config {
 			matches.length > 0 &&
 			this.options.suppressLoggerWarning === true
 		) {
-			return;
+			this.internal(
+				"Warning, name has ansi control characters and colouring may be malformed.",
+			);
+		}
+
+		if (this.files.enabled === true) {
+			if (typeof this.files.format === "undefined")
+				this.files.format === "{time} {level} {message}";
+			if (typeof this.files.naming === "undefined")
+				this.files.naming === "json";
+			if (typeof this.files.noConsole === "undefined")
+				this.files.noConsole === false;
+			if (typeof this.files.path === "undefined") this.files.path === "json";
+			if (typeof this.files.type === "undefined") this.files.type === "json";
+
+			if (!path.isAbsolute(this.files.path)) {
+				this.internal(
+					"Presuming that path provided is from project root. Using following path:",
+					path.join(process.cwd(), this.files.path),
+				);
+				this.files.path = path.join(process.cwd(), this.files.path);
+
+				this.fileWriter = fs.createWriteStream(this.files.path, {
+					flags: "a",
+				});
+				this.fileWriter.write("[");
+			}
+
+			process.on("beforeExit", () => {
+				if (this.files.type === "json") {
+					this.fileWriter.write("]");
+				}
+
+				this.fileWriter.close();
+			});
 		}
 	}
+	private writeFile(level: Level, ...data: any[]) {
+		let Data = "";
+
+		data.forEach((v) => {
+			if (typeof v === "object") {
+				Data += JSON.stringify(v);
+			} else {
+				Data += `${v}`;
+			}
+			Data += " ";
+		});
+
+		if (this.files.type === "json") {
+			this.fileWriter.write(
+				`${JSON.stringify({
+					level: `${Level[level]}`,
+					time: `${getTime()}`,
+					data: `${Data}`,
+				})},`,
+			);
+		} else {
+			this.fileWriter.write();
+		}
+	}
+
 	private log(prefix: string, ...data: any[]) {
-		const dataMap = new Map(Object.entries(data));
+		let Data = "";
 
-		let Data: string;
-
-		dataMap.forEach((v) => {
+		data.forEach((v) => {
 			if (typeof v === "object") {
 				if (this.options.format === true) {
 					Data += colorize(v, { indent: this.options.indent });
@@ -74,102 +131,82 @@ export class Logger implements Config {
 					Data += JSON.stringify(v, null, this.options.indent);
 				}
 			} else {
-				Data += new String(v);
+				Data += `${v}`;
 			}
+			Data += " ";
 		});
 
-		return console.log(prefix, consoleColours.white(Data));
+		return console.log(prefix, consoleColours.white(Data.trim()));
 	}
 	/**
-	 * Log a trace
+	 * Log data as trace
 	 * @param data Any information to be logged
 	 */
 	public trace(...data: any[]) {
-		let log;
-		if (this.files.enabled === true) {
-			if (this.files.noConsole === false) {
-				log = this.log(
-					`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)}${consoleColours.blue(" [Trace] ")}`,
-					data,
-				);
-			}
-		}
-
-		return log;
+		return this.log(
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.blue("[Trace]")}`,
+			...data,
+		);
 	}
 	/**
-	 * Log a debug
+	 * Log data as debug
 	 * @param data Any information to be logged
 	 */
 	public debug(...data: any[]) {
 		return this.log(
-			`
-		${consoleColours.grey(
-			getTime(),
-		)} ${consoleColours.underline(this.name)}${consoleColours.cyan(
-			" [Debug] ",
-		)}`,
-			data,
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.cyan("[Debug]")}`,
+			...data,
 		);
 	}
 	/**
-	 * Log a info
+	 * Log data as info
 	 * @param data Any information to be logged
 	 */
 	public info(...data: any[]) {
 		return this.log(
-			`
-		${consoleColours.grey(
-			getTime(),
-		)} ${consoleColours.underline(this.name)}${consoleColours.blueBright(
-			" [Info] ",
-		)}`,
-			data,
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.blueBright("[Info]")}`,
+			...data,
 		);
 	}
 	/**
-	 * Log a warning
+	 * Log data as warning
 	 * @param data Any information to be logged
 	 */
 	public warn(...data: any[]) {
 		return this.log(
-			`
-		${consoleColours.grey(
-			getTime(),
-		)} ${consoleColours.underline(this.name)}${consoleColours.yellow(
-			" [Warning] ",
-		)}`,
-			data,
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.yellow("[Warning]")}`,
+			...data,
 		);
 	}
 	/**
-	 * Log a error
+	 * Log data as error
 	 * @param data Any information to be logged
 	 */
 	public error(...data: any[]) {
 		return this.log(
-			`
-		${consoleColours.grey(
-			getTime(),
-		)} ${consoleColours.underline(this.name)}${consoleColours.redBright(
-			" [Error] ",
-		)}`,
-			data,
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.redBright("[Error]")}`,
+			...data,
 		);
 	}
 	/**
-	 * Log a fatal
+	 * Log data as fatal
 	 * @param data Any information to be logged
 	 */
 	public fatal(...data: any[]) {
 		return this.log(
-			`
-		${consoleColours.grey(
-			getTime(),
-		)} ${consoleColours.underline(this.name)}${consoleColours.bgRed(
-			" [Fatal] ",
-		)}`,
-			data,
+			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.bgRed("[Fatal]")}`,
+			...data,
+		);
+	}
+	/**
+	 * Internal logging to pass to the user.
+	 * @todo Add a option to disable this logging
+	 * @param data Any information to be logged
+	 */
+	private internal(...data: any[]) {
+		return this.log(
+			`${consoleColours.grey(getTime())} ${consoleColours.underline("Logger")} ${consoleColours.green("[Internal]")}`,
+			...data,
 		);
 	}
 }
