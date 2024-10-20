@@ -3,3 +3,7 @@ src
 test
 
 tsconfig.*
+tsup.*
+node_modules
+.editorconfig
+biome.json
