@@ -17,14 +17,15 @@ function getTime(): string {
 }
 
 export class Logger implements Config {
-	readonly name: string;
+	name: string;
+	fileWriter?: fs.WriteStream;
 	options: Required<ClassOptions> = {
 		format: false,
 		indent: 0,
 		logLevel: 1,
 		suppressLoggerWarning: false,
 	};
-	files: Required<FilesOptions> | { enabled: false };
+	files: FilesOptions = { enabled: false };
 	constructor(
 		name: string,
 		options?: Partial<UserOptions>,
