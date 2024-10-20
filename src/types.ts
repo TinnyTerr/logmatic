@@ -8,6 +8,7 @@ export enum Level {
 	Warn = 3,
 	Error = 4,
 	Fatal = 5,
+	None = 6,
 }
 
 export interface UserOptions extends Options {
@@ -60,7 +61,7 @@ export interface FilesOptions {
 	 */
 	path?: string | null;
 	/**
-	 * Naming is the format of each file.
+	 * Naming is the format of each filename.
 	 * If the format is not set, the logs will be saved in the default format.
 	 * The file extention *WILL* be put on the file no matter what
 	 *
