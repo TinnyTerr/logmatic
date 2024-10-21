@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import consoleColours from "console-log-colors";
 import { colorize } from "json-colorizer";
 import fs from "node:fs";
