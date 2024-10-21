@@ -56,6 +56,12 @@ Files Config    - The config of how it writes the log to files. See [#Files Conf
 - [#Type](#files-config---type)
 - [#Naming](#files-config---naming)
 
+For the config sections, the examples will have the following config:
+```javascript
+const log = new Logger("log", { logLevel: 5 }); // + the config being demonstated
+```
+The logs are taken from the [CommonJS test file](./tests/test.cjs).
+
 ### Logging Config
 
 #### Logging Config - Log level
@@ -79,7 +85,8 @@ enum Level {
 }
 ```
 
-Select the level you wish output or None.
+Select the level you wish output or None. Eg, to only log fatal and above, you set the logevel to 5 or import it and use it as a object and the following is output:
+[](./images/loglevel.png)
 
 ---
 
