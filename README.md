@@ -85,8 +85,8 @@ enum Level {
 }
 ```
 
-Select the level you wish output or None. Eg, to only log fatal and above, you set the logevel to 5 or import it and use it as a object and the following is output:
-[](./images/loglevel.png)
+Select the level you wish output or None. Eg, to only log fatal and above, you set the loglevel to 5 or import it and use it as a object and the following is output:
+![Log Level Output](./images/loglevel.png)
 
 ---
 
@@ -100,6 +100,8 @@ Suppresses warnings output by the logger. Any error thrown while outputting is p
 Current errors supressed are: 
 - ANSI colouring text in log name.
 
+**No example**
+
 ---
 
 #### Logging Config - Formatting
@@ -110,6 +112,8 @@ type format = boolean | undefined;
 
 Formatting the objects/arrays passed to the class.
 Calls JSON.stringify or colourize using the object using the indentation provided and outputs it (See [#Indentation](#logging-config---indentation))
+
+![Formatting Output](./images/format.png)
 
 ---
 
@@ -123,6 +127,8 @@ type indent = number | undefined;
 ```
 Indents objects/arrays passed to the class
 Calls JSON.stringify and passes object and indentation and outputs it.
+
+![Indentation Output](./images/indent.png)
 
 ### Files Config
 
