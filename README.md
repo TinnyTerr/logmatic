@@ -4,6 +4,10 @@ Welcome to logmatic.
 
 A simple, lightweight and customisable logger for all your needs.
 
+# Performance
+
+For my machine (tinnyterr), I average 85ms with a low of 60ms and a high of 160ms on a i7 6700K. That includes the initialisation and logging of one log.
+
 # Usage
 
 To install, run:
