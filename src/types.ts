@@ -114,8 +114,8 @@ export interface FilesOptions {
 export interface Config {
 	options: Options;
 	files:
-	| FilesOptions
-	| {
-		enabled: false;
-	};
+		| FilesOptions
+		| {
+				enabled: false;
+		  };
 }

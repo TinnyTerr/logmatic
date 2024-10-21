@@ -84,18 +84,23 @@ export class Logger implements Config {
 				this.files.noConsole === false;
 			if (typeof this.files.type === "undefined") this.files.type === "json";
 
-			if (!path.isAbsolute(this.files.path + `.` + this.files.type)) {
+			if (!path.isAbsolute(`${this.files.path}.${this.files.type}`)) {
 				this.internal(
 					"Presuming that path provided is from project root. Using following path:",
 					path.join(process.cwd(), this.files.path),
 				);
-				this.files.path = path.join(process.cwd(), this.files.path + `.` + this.files.type);
+				this.files.path = path.join(
+					process.cwd(),
+					`${this.files.path}.${this.files.type}`,
+				);
 
 				if (fs.existsSync(this.files.path))
-
-					this.fileWriter = fs.createWriteStream(this.files.path + `.` + this.files.type, {
-						flags: "a",
-					});
+					this.fileWriter = fs.createWriteStream(
+						`${this.files.path}.${this.files.type}`,
+						{
+							flags: "a",
+						},
+					);
 				this.fileWriter.write("[");
 			}
 
@@ -104,9 +109,11 @@ export class Logger implements Config {
 					this.fileWriter.write("]");
 				}
 
-				this.fileWriter.close(
-					err => { if (err) { throw err } }
-				);
+				this.fileWriter.close((err) => {
+					if (err) {
+						throw err;
+					}
+				});
 			});
 		}
 	}
@@ -133,9 +140,13 @@ export class Logger implements Config {
 		} else {
 			let data: string;
 
-			data = this.files.format.replace("{date}", getDate()).replace("{time}", getTime()).replace("{level}", Level[level].toLocaleUpperCase()).replace("{message}", Data)
+			data = this.files.format
+				.replace("{date}", getDate())
+				.replace("{time}", getTime())
+				.replace("{level}", Level[level].toLocaleUpperCase())
+				.replace("{message}", Data);
 
-			this.fileWriter.write(data + `\n`);
+			this.fileWriter.write(`${data}\n`);
 		}
 	}
 
@@ -162,10 +173,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public trace(...data: any[]) {
-		if (this.options.logLevel > Level.Trace) return
+		if (this.options.logLevel > Level.Trace) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Trace, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Trace, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.blue("[Trace]")}`,
@@ -177,10 +188,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public debug(...data: any[]) {
-		if (this.options.logLevel > Level.Debug) return
+		if (this.options.logLevel > Level.Debug) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Debug, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Debug, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.cyan("[Debug]")}`,
@@ -192,10 +203,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public info(...data: any[]) {
-		if (this.options.logLevel > Level.Info) return
+		if (this.options.logLevel > Level.Info) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Info, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Info, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.blueBright("[Info]")}`,
@@ -207,10 +218,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public warn(...data: any[]) {
-		if (this.options.logLevel > Level.Warn) return
+		if (this.options.logLevel > Level.Warn) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Warn, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Warn, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.yellow("[Warning]")}`,
@@ -222,10 +233,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public error(...data: any[]) {
-		if (this.options.logLevel > Level.Error) return
+		if (this.options.logLevel > Level.Error) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Error, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Error, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.redBright("[Error]")}`,
@@ -237,10 +248,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	public fatal(...data: any[]) {
-		if (this.options.logLevel > Level.Fatal) return
+		if (this.options.logLevel > Level.Fatal) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Fatal, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Fatal, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline(this.name)} ${consoleColours.bgRed("[Fatal]")}`,
@@ -253,10 +264,10 @@ export class Logger implements Config {
 	 * @param data Any information to be logged
 	 */
 	private internal(...data: any[]) {
-		if (this.options.logLevel > Level.Internal) return
+		if (this.options.logLevel > Level.Internal) return;
 		if (this.files.enabled === true) {
-			this.writeFile(Level.Internal, ...data)
-			if (this.files.noConsole === true) return
+			this.writeFile(Level.Internal, ...data);
+			if (this.files.noConsole === true) return;
 		}
 		return this.log(
 			`${consoleColours.grey(getTime())} ${consoleColours.underline("Logger")} ${consoleColours.green("[Internal]")}`,
