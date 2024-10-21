@@ -74,7 +74,8 @@ enum Level {
     Warn = 3,
     Error = 4,
     Fatal = 5,
-    None = 6,
+    Internal = 6,
+    None = 7,
 }
 ```
 
