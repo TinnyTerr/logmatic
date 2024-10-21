@@ -1,6 +1,6 @@
 const { Logger } = require("../dist/cjs/index.js");
 
-const log = new Logger("log", { logLevel: 0 });
+const log = new Logger("log");
 
 log.trace("test trace");
 log.trace("test trace with data", { thisIs: true, andNot: false });
