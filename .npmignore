@@ -2,6 +2,4 @@
 src
 test
 
-
 tsconfig.*
-.prettierrc
