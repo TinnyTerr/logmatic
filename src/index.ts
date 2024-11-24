@@ -22,13 +22,20 @@ export enum Level {
 	Fatal = 5,
 }
 
-export default class Logger {
+class Logger {
 	[key: string]: ((...data: any[]) => void) | unknown;
 	name: string;
-	options: Options;
+	options: Options & {
+		levels: customLevel[];
+		functions: logFunction[];
+	};
+
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
 	constructor(name: string, options: Partial<Options> = {}) {
-		const defaults: Options = {
+		const defaults: Options & {
+			levels: customLevel[];
+			functions: logFunction[];
+		} = {
 			console: {
 				enabled: true,
 				format: false,
@@ -39,33 +46,51 @@ export default class Logger {
 			files: { enabled: false },
 			web: { enabled: false },
 			levels: [
-				{ name: 'Trace', colour: 'cyanBright' },
-				{ name: 'Debug', colour: 'blueBG' },
-				{ name: 'Info', colour: 'blue' },
-				{ name: 'Warn', colour: 'yellow' },
-				{ name: 'Error', colour: 'red' },
-				{ name: 'Fatal', colour: 'redBG' },
+				{ name: 'trace', colour: 'cyanBright' },
+				{ name: 'debug', colour: 'blueBG' },
+				{ name: 'info', colour: 'blue' },
+				{ name: 'warn', colour: 'yellow' },
+				{ name: 'error', colour: 'red' },
+				{ name: 'fatal', colour: 'redBG' },
 			],
+			functions: [],
 		};
 
+		if (options.functions) {
+			if (!Array.isArray(options.functions)) {
+				options.functions = [options.functions];
+			}
+
+			defaults.functions.push(...options.functions);
+			options.functions = undefined;
+		}
+		if (options.levels) {
+			if (!Array.isArray(options.levels)) {
+				options.levels = [options.levels];
+			}
+
+			defaults.levels.push(...options.levels);
+			options.levels = undefined;
+		}
+
+		// Above we check if options.functions and options.levels are arrays and if not convert them.
+		// Due to options.functions being its own individual type {function}, ts realises the change and inserts it.
+		// However, with options.levels being a object, this change does not happen and a TypeError is thrown here when we try to redefine the type.
+		//@ts-expect-error
 		this.options = merge<Options, Partial<Options>>(defaults, options);
 		this.name = name;
 
 		for (let i = 0; i < this.options.levels.length; i++) {
 			const level = this.options.levels[i];
 			this[level.name] = (...data: any[]) => {
-				return new Promise<void>((resolve, reject) => {
-					try {
-						this.logs.console(i, ...data);
-						this.logs.files(i, ...data);
-						this.logs.funcs(i, ...data);
-						this.logs.web(i, ...data);
-
-						resolve();
-					} catch (error) {
-						reject(error);
-					}
-				});
+				try {
+					this.logs.console(i, ...data);
+					this.logs.files(i, ...data);
+					this.logs.funcs(i, ...data);
+					this.logs.web(i, ...data);
+				} catch (error) {
+					this.internalLogging(`threw ${error}`);
+				}
 			};
 		}
 	}
@@ -91,8 +116,12 @@ export default class Logger {
 		web: (level: number, ...data: any[]) => void;
 		funcs: (level: number, ...data: any[]) => void;
 	} = {
-		console: (level: number, ...data) => {
-			if (!this.options.console.enabled === true) {
+		console: async (level: number, ...data) => {
+			// Ensure that logging is enabled and the level is allowed by the logLevel
+			if (
+				!this.options.console.enabled ||
+				level < this.options.console.logLevel
+			) {
 				return;
 			}
 
@@ -100,16 +129,10 @@ export default class Logger {
 
 			for (let i = 0; i < data.length; i++) {
 				const v = data[i];
-				if (!this.options.console.enabled === true) {
-					throw Error('Options changed during execution');
-				}
 
 				if (typeof v === 'string') {
 					message += ` ${v}`;
-					return;
-				}
-
-				if (typeof v === 'object') {
+				} else if (typeof v === 'object') {
 					const jsonString = JSON.stringify(
 						v,
 						null,
@@ -123,34 +146,48 @@ export default class Logger {
 								})
 							: jsonString
 					}`;
-					return;
+				} else {
+					message += ` ${String(v)}`;
 				}
-
-				message += ` ${String(v)}`;
 			}
 
+			// Log the message with the corresponding color and level
 			console.log(
 				consoleColours.gray(getTime()),
 				consoleColours[this.options.levels[level].colour](
-					this.options.levels[level].name,
+					`[${this.options.levels[level].name}]`,
 				),
-				message,
+				consoleColours.underline(this.name),
+				message.slice(1),
 			);
 		},
-		files: (level, ...data) => {
+		files: async (level, ...data) => {
 			level.toPrecision(2);
 			data.at(2);
 			return;
 		},
-		web: (level, ...data) => {
+		web: async (level, ...data) => {
 			level.toPrecision(2);
 			data.at(2);
 			return;
 		},
-		funcs: (level, ...data) => {
-			level.toPrecision(2);
-			data.at(2);
-			return;
+		funcs: async (level, ...data) => {
+			for (let index = 0; index < this.funcs.length; index++) {
+				const element = this.funcs[index];
+
+				try {
+					element(level, ...data);
+				} catch (err) {
+					this.internalLogging(
+						`Function at index ${index} threw "${err}"`,
+						'Removing due to unhandled error',
+					);
+
+					this.funcs.splice(index, 1);
+
+					index--;
+				}
+			}
 		},
 	};
 	private internalLogging(...data: string[]) {
