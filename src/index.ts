@@ -55,16 +55,13 @@ export default class Logger {
 			this[level.name] = (...data: any[]) => {
 				return new Promise<void>((resolve, reject) => {
 					try {
-						// Assuming logs methods are logging and handling data
 						this.logs.console(i, ...data);
 						this.logs.files(i, ...data);
 						this.logs.funcs(i, ...data);
 						this.logs.web(i, ...data);
 
-						// Resolving the promise after the logs
 						resolve();
 					} catch (error) {
-						// Rejecting the promise if there's an error
 						reject(error);
 					}
 				});
