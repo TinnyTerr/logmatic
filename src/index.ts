@@ -1,4 +1,3 @@
-import type { Options } from './types.d.ts';
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
 import { merge } from 'lodash';
