@@ -1,6 +1,8 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
-import { merge } from 'lodash';
+// !Module support!
+import pkg from 'lodash';
+const { merge } = pkg;
 
 function getTime(): string {
 	const now = new Date();
