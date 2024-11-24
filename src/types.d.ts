@@ -1,15 +1,8 @@
+import { Level } from './index';
+
 /**
  * Optional enum. Corresponds to array
  */
-enum Level {
-	Trace = 0,
-	Debug = 1,
-	Info = 2,
-	Warn = 3,
-	Error = 4,
-	Fatal = 5,
-}
-
 interface Options {
 	console: console;
 	files: files;

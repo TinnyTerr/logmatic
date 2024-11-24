@@ -98,6 +98,6 @@
             "lineEnding": "lf",
             "indentWidth": 4
         },
-        "globals": []
+        "globals": ["Level"]
     }
 }

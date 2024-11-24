@@ -1,4 +1,4 @@
-import { Level, Options } from './types';
+import type { Options } from './types.d.ts';
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
 import { merge } from 'lodash';
@@ -7,6 +7,15 @@ function getTime(): string {
 	const now = new Date();
 	const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 	return date.toISOString().replace(/.*T(.*)Z/, '$1');
+}
+
+export enum Level {
+	Trace = 0,
+	Debug = 1,
+	Info = 2,
+	Warn = 3,
+	Error = 4,
+	Fatal = 5,
 }
 
 export default class Logger {
