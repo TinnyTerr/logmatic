@@ -9,6 +9,9 @@ function getTime(): string {
 	return date.toISOString().replace(/.*T(.*)Z/, '$1');
 }
 
+/**
+ * Optional enum of default levels. Corresponds to array
+ */
 export enum Level {
 	Trace = 0,
 	Debug = 1,
@@ -19,6 +22,7 @@ export enum Level {
 }
 
 export default class Logger {
+	[key: string]: ((...data: any[]) => void) | unknown;
 	name: string;
 	options: Options;
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
@@ -45,29 +49,59 @@ export default class Logger {
 
 		this.options = merge<Options, Partial<Options>>(defaults, options);
 		this.name = name;
+
+		for (let i = 0; i < this.options.levels.length; i++) {
+			const level = this.options.levels[i];
+			this[level.name] = (...data: any[]) => {
+				return new Promise<void>((resolve, reject) => {
+					try {
+						// Assuming logs methods are logging and handling data
+						this.logs.console(i, ...data);
+						this.logs.files(i, ...data);
+						this.logs.funcs(i, ...data);
+						this.logs.web(i, ...data);
+
+						// Resolving the promise after the logs
+						resolve();
+					} catch (error) {
+						// Rejecting the promise if there's an error
+						reject(error);
+					}
+				});
+			};
+		}
 	}
 	/**
-	 * addFunctions
+	 * Pushes custom handling functions on top of the already selected methods
 	 */
 	public addFunctions(
+		...funcs: Array<(level: Level, ...data: any[]) => void>
+	) {
+		this.funcs.push(...funcs);
+	}
+	/**
+	 * Sets the array of custom handling functions, replacing existing.
+	 */
+	public setFunctions(
 		...funcs: Array<(level: Level, ...data: any[]) => void>
 	) {
 		this.funcs = funcs;
 	}
 	private logs: {
-		console: (level: Level, ...data: any[]) => void;
-		files: (level: Level, ...data: any[]) => void;
-		web: (level: Level, ...data: any[]) => void;
-		funcs: (level: Level, ...data: any[]) => void;
+		console: (level: number, ...data: any[]) => void;
+		files: (level: number, ...data: any[]) => void;
+		web: (level: number, ...data: any[]) => void;
+		funcs: (level: number, ...data: any[]) => void;
 	} = {
-		console: (level, ...data) => {
+		console: (level: number, ...data) => {
 			if (!this.options.console.enabled === true) {
 				return;
 			}
 
 			let message = '';
 
-			Array(...data).forEach((v) => {
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
 				if (!this.options.console.enabled === true) {
 					throw Error('Options changed during execution');
 				}
@@ -95,17 +129,29 @@ export default class Logger {
 				}
 
 				message += ` ${String(v)}`;
-			});
+			}
 
-			console.log();
+			console.log(
+				consoleColours.gray(getTime()),
+				consoleColours[this.options.levels[level].colour](
+					this.options.levels[level].name,
+				),
+				message,
+			);
 		},
 		files: (level, ...data) => {
+			level.toPrecision(2);
+			data.at(2);
 			return;
 		},
 		web: (level, ...data) => {
+			level.toPrecision(2);
+			data.at(2);
 			return;
 		},
 		funcs: (level, ...data) => {
+			level.toPrecision(2);
+			data.at(2);
 			return;
 		},
 	};
@@ -117,16 +163,14 @@ export default class Logger {
 
 			let message = '';
 
-			new Map(Object.entries(data)).forEach((v) => {
-				message += v;
-			});
+			for (let i = 0; i < data.length; i++) {
+				message += `${data[i]} `;
+			}
 
 			console.log(
-				consoleColours.greenBright`[Internal]` +
-					message +
-					consoleColours.green(
-						` ${JSON.stringify(data, null, this.options.console.indent)}`,
-					),
+				consoleColours.gray(getTime()),
+				consoleColours.greenBright(`[Internal]`),
+				message,
 			);
 		}
 	}
