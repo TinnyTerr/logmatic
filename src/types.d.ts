@@ -1,8 +1,5 @@
 import { Level } from './index';
 
-/**
- * Optional enum. Corresponds to array
- */
 interface Options {
 	console: console;
 	files: files;
@@ -10,7 +7,7 @@ interface Options {
 	levels: customLevel[];
 }
 
-type customLevel = {
+export type customLevel = {
 	name: string;
 	colour: ColourList;
 };
