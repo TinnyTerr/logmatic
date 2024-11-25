@@ -22,7 +22,7 @@
         "compile": "npx tsup --config tsup.config.ts --format cjs src/* && npx tsup --config tsup.config.ts --format esm src/*",
         "fullCompile": "rm -rf dist && npm run lint && npm run generateTypes && npm run compile",
         "generateTypes": "npx tsc",
-        "test": "npm run fullCompile && node tesst/test.cjs && node tests/test.mjs"
+        "test": "npm run fullCompile && node tests/test.cjs && node tests/test.mjs"
     },
     "devDependencies": {
         "@types/lodash": "^4.17.13",
