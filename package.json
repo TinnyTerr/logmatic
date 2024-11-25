@@ -21,7 +21,8 @@
         "lint": "npx @biomejs/biome lint --write",
         "compile": "npx tsup --config tsup.config.ts --format cjs src/* && npx tsup --config tsup.config.ts --format esm src/*",
         "fullCompile": "rm -rf dist && npm run lint && npm run generateTypes && npm run compile",
-        "generateTypes": "npx tsc"
+        "generateTypes": "npx tsc",
+        "test": "npm run fullCompile && node test/test.cjs && node test/test.mjs"
     },
     "devDependencies": {
         "@types/lodash": "^4.17.13",
