@@ -1,6 +1,6 @@
-const { logger } = require('../dist/commonjs/index.cjs');
+const { Logger } = require('../dist/index.js');
 
-const log = new logger('test', { logLevel: 0 });
+const log = new Logger('test');
 
 log.trace('test trace');
 log.trace('test trace with data', { thisIs: true, andNot: false });
@@ -20,7 +20,9 @@ log.error('test error with data', { thisIs: true, andNot: false });
 log.fatal('test fatal');
 log.fatal('test fatal with data', { thisIs: true, andNot: false });
 
-const logIndent = new logger('test', { logLevel: 0, indent: 4 });
+const logIndent = new Logger('indent', {
+	console: { logLevel: 0, format: true, indent: 4 },
+});
 
 logIndent.trace('test trace');
 logIndent.trace('test trace with data', { thisIs: true, andNot: false });
