@@ -21,6 +21,9 @@ const { Logger } = require('logmatic');
 
 const log = new Logger("name");
 ```
+
+For the default added levels, use the following: 
+
 | Function Call | Format | Colour |
 |----|----|----|
 |`log.trace()`|`{time} [trace] {name} {...data}`|Cyan|
@@ -29,6 +32,8 @@ const log = new Logger("name");
 |`log.warn()`|`{time} [warn] {name} {...data}`|Yellow|
 |`log.error()`|`{time} [error] {name} {...data}`|Red|
 |`log.fatal()`|`{time} [fatal] {name} {...data}`|Red Background|
+
+For your custom levels, please see [Levels](#levels) below
 
 ## Options
 
