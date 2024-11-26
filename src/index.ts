@@ -29,7 +29,6 @@ class Logger {
 		levels: customLevel[];
 		functions: logFunction[];
 	};
-
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
 	constructor(name: string, options: Partial<Options> = {}) {
 		const defaults: Options & {
@@ -311,13 +310,13 @@ type web =
 			 */
 			enabled: true;
 			/**
-			 * Url to post to
+			 * The URL to post to
 			 * @default null
 			 * @ignore Incomplete section
 			 */
 			url: string;
 			/**
-			 * Data type
+			 * The data type sent
 			 * @default json
 			 * @ignore Incomplete section
 			 */
@@ -341,7 +340,7 @@ type web =
 /**
  * A custom function ran for every log.
  */
-type logFunction = (level: Level, data: string) => void;
+type logFunction = (level: Level, ...data: any[]) => void;
 
 /**
  * @see colorList From package console-log-colors
