@@ -70,7 +70,7 @@ Default: `false`
 **WARNING:** This option is currently not in use.
 
 ```javascript
-const log = new Logger("name", { console: { supressWarnings: 1 }})
+const log = new Logger("name", { console: { supressWarnings: false }})
 ```
 ---
 #### Format
@@ -87,10 +87,10 @@ const log = new Logger("name", { console: { format: false }})
 
 Whether to indent any JSON output
 
-Default: `false`
+Default: `0`
 
 ```javascript
-const log = new Logger("name", { console: { indent: 4 }})
+const log = new Logger("name", { console: { indent: 0 }})
 ```
 ---
 ### Files
@@ -112,7 +112,7 @@ const log = new Logger("name", { files: { enabled: false }})
 
 The log directory
 
-In depth: if path = `/path/to/dir/` then logs will be stored as `/path/to/dir/log.txt` etc.
+In-depth: if path = `/path/to/dir/` then logs will be stored as `/path/to/dir/log.txt` etc.
 
 Default `null`
 
