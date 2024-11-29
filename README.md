@@ -1,3 +1,7 @@
+# CONTRIBUTERS REQUESTED
+
+For anyone interested with supporting this passion project, please check out [Contributing](CONTRIBUTING.md).
+
 # Logmatic
 
 An overly complicated yet functional logger.
@@ -190,6 +194,8 @@ const log = new Logger("name", { levels: [{ name: "level", colour:"red" }]})
 ```
 
 The colour should be derived from the package [console-log-colors](https://www.npmjs.com/package/console-log-colors) or from a slimmed list included in the types.
+
+Also, you are able to overwrite existing functions. For example, you could overwrite the info logger level by redefining it. 
 ---
 ### Functions
 
