@@ -1,5 +1,8 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
+import axios from 'axios';
+import fs from 'node:fs';
+import path from 'node:path';
 // !Module support!
 import pkg from 'lodash';
 const { merge } = pkg;
@@ -25,6 +28,7 @@ export enum Level {
 class Logger {
 	[key: string]: ((...data: any[]) => void) | unknown;
 	name: string;
+	webData: any[] = [];
 	options: Options & {
 		levels: customLevel[];
 		functions: logFunction[];
@@ -91,6 +95,10 @@ class Logger {
 					this.internalLogging(`threw ${error}`);
 				}
 			};
+		}
+
+		if (this.options.web.enabled) {
+			this.webCounter = this.options.web.every;
 		}
 	}
 	/**
@@ -160,16 +168,112 @@ class Logger {
 				message.slice(1),
 			);
 		},
+		//TODO: Test this function.
 		files: async (level, ...data) => {
-			level.toPrecision(2);
-			data.at(2);
-			return;
+			if (!this.options.files.enabled) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			if (this.options.files.type === 'json') {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
+
+				fs.appendFileSync(
+					this.options.files.path,
+					JSON.stringify({ level, data: message }),
+				);
+			} else {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
+
+				// Write data to the file
+				fs.appendFileSync(
+					this.options.files.path,
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
+			}
 		},
+		//TODO: Test this function.
 		web: async (level, ...data) => {
-			level.toPrecision(2);
-			data.at(2);
-			return;
+			if (this.options.web.enabled === false) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			if (this.options.web.type === 'json') {
+				this.webData.push({ level, data: message });
+
+				// Check if enough data is collected to send
+				if (this.webData.length >= this.options.web.every) {
+					await axios
+						.post(
+							this.options.web.url,
+							JSON.stringify(this.webData),
+						)
+						.then((v) => {
+							if (v.status.toString().charAt(0) !== '2') {
+								this.options.web.enabled = false;
+								this.internalLogging(
+									`Got ${v.status} (${v.statusText}) and stopping requests.`,
+								);
+							}
+						});
+
+					// Clear the data after sending
+					this.webData = [];
+				}
+			} else {
+				this.webData.push(
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
+
+				if (this.webData.length >= this.options.web.every) {
+					const data = this.webData.join('\n');
+
+					await axios.post(this.options.web.url, data).then((v) => {
+						if (v.status.toString().charAt(0) !== '2') {
+							this.options.web.enabled = false;
+							this.internalLogging(
+								`Got ${v.status} (${v.statusText}) and stopping requests.`,
+							);
+						}
+					});
+
+					// Clear the data after sending
+					this.webData = [];
+				}
+			}
 		},
+		//TODO: Test this function.
 		funcs: async (level, ...data) => {
 			for (let index = 0; index < this.funcs.length; index++) {
 				const element = this.funcs[index];
@@ -273,8 +377,8 @@ type files =
 			 */
 			enabled: true;
 			/**
-			 * The log directory
-			 * @description if path = `/path/to/dir/` then logs will be stored as `/path/to/dir/log.txt` etc.
+			 * The absolute path to the file to be logged in
+			 * @example /path/to/file = /path/to/file.json
 			 * @default null
 			 * @ignore Incomplete section
 			 */
