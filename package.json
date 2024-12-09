@@ -13,17 +13,19 @@
         "url": "https://github.com/tinnyterr/logmatic.git"
     },
     "exports": {
-        "import": "./dist/es6/index.mjs",
-        "require": "./dist/commonjs/index.cjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
     },
     "types": "./dist/index.d.ts",
     "scripts": {
-        "pretest": " npx tsc --outDir ./dist/es6 -m es6 ; npx tsc --outDir ./dist/commonjs -m commonjs ; mv ./dist/es6/index.js ./dist/es6/index.mjs ; mv ./dist/commonjs/index.js ./dist/commonjs/index.cjs ; npx tsc --emitDeclarationOnly",
-        "test": "node tests/test.cjs ; node tests/test.mjs",
-        "posttest": "rm -rf *.log */*.log */dist node_modules ; npm i ",
-        "compile": "npm run pretest"
+        "lint": "npx @biomejs/biome lint --write",
+        "compile": "npx tsup --config tsup.config.ts --format cjs src/* && npx tsup --config tsup.config.ts --format esm src/*",
+        "fullCompile": "rm -rf dist && npm run lint && npm run generateTypes && npm run compile",
+        "generateTypes": "npx tsc",
+        "test": "npm run fullCompile && node tests/test.cjs && node tests/test.mjs"
     },
     "devDependencies": {
+        "@types/lodash": "^4.17.13",
         "@types/node": "18.19.30",
         "@typescript-eslint/eslint-plugin": "7.5.0",
         "@typescript-eslint/parser": "7.5.0",
@@ -37,7 +39,11 @@
         "typescript": "5.4.4"
     },
     "dependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "axios": "^1.7.8",
         "console-log-colors": "^0.5.0",
-        "json-colorizer": "^3.0.1"
+        "json-colorizer": "^3.0.1",
+        "lodash": "^4.17.21",
+        "tsup": "^8.3.5"
     }
 }

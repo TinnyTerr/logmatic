@@ -1,271 +1,493 @@
 import consoleColours from 'console-log-colors';
 import { colorize } from 'json-colorizer';
-
-export interface options {
-    logLevel?: Level;
-    suppressWarnings?: boolean;
-    quitOnFatal?: boolean;
-    format?: boolean;
-    indent?: number | boolean;
-}
-
-interface config {
-    options: {
-        logLevel: Level;
-        suppressWarnings: boolean;
-        quitOnFatal: boolean;
-        format: boolean;
-        indent: number;
-    };
-}
-
-enum Level {
-    trace,
-    debug,
-    info,
-    warn,
-    error,
-    fatal,
-}
+import axios from 'axios';
+import fs from 'node:fs';
+import path from 'node:path';
+// !Module support!
+import pkg from 'lodash';
+const { merge } = pkg;
 
 function getTime(): string {
-    const now = new Date();
-    const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    return date.toISOString().replace(/.*T(.*)Z/, '$1');
+	const now = new Date();
+	const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+	return date.toISOString().replace(/.*T(.*)Z/, '$1');
 }
 
-export class logger implements config {
-    name: string = '';
-    options: config['options'] = {
-        logLevel: 1,
-        suppressWarnings: false,
-        quitOnFatal: false,
-        format: false,
-        indent: 0,
-    };
-
-    constructor(name: string, options?: options) {
-        this.internalLogging('[WARN] ');
-
-        // Define config
-        this.name = `${name}`;
-
-        //* Setback option definitions to set values
-
-        if (!options) {
-            this.options = {
-                logLevel: 1,
-                suppressWarnings: false,
-                quitOnFatal: false,
-                format: false,
-                indent: 0,
-            };
-        } else {
-            this.options.logLevel = options.logLevel ?? 1;
-            this.options.suppressWarnings = options.suppressWarnings ?? false;
-            this.options.quitOnFatal = options.quitOnFatal ?? false;
-            this.options.format = options.format ?? false;
-            if (options.indent === false) this.options.indent = 0;
-            else if (options.indent === true) this.options.indent = 4;
-            else if (
-                typeof options.indent === 'number' ||
-                typeof options.indent === 'undefined'
-            )
-                this.options.indent = options.indent ?? 0;
-            else throw new TypeError('Indentation option is not a valid type');
-        }
-
-        const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
-        const matches = name.match(ansiRegex) ?? [];
-        if (matches.length > 0 && this.options.suppressWarnings === false)
-            throw new Error('ANSI characters in name found.');
-        else if (matches.length > 0)
-            this.internalLogging(
-                'Warning, name contains ANSI characters. May affect colouring in the terminal',
-            );
-
-        /*let lvlIndent: number = 0;
-
-        this.internalLogging('Log Level is current erroring out and defaults to trace');
-
-        if (!options) options = { logLevel: Level.debug };
-        else {
-            if (!options.logLevel === undefined) {
-                options.logLevel === Level.debug;
-            }
-            if (options.indent === undefined) lvlIndent === 0;
-            // * NO MORE DO WE HAVE THE INDENTATION WARNING WHOOOOOH
-        }
-        if (options.suppressWarnings === false) {
-            if (name.length > 15) throw new Error('Name invalid. Check the FAQ');
-            const ansiRegex: RegExp = /\x1b\[[0-9;]*m/g;
-            const matches = name.match(ansiRegex) ?? [];
-            if (matches.length > 0) throw new Error('ANSI characters in name found.');
-        }
-
-        this.options = options?.options;
-        if (options.indent && options.indent > 0) {
-            formatOptions = {
-                highlight: true,
-                indent: options.indent,
-            };
-        } else {
-            formatOptions = {
-                highlight: true,
-                min: true,
-            };
-        }
-        this.name = `${name}`;*/
-    }
-
-    private async log(level: Level, ...data: Array<any>): Promise<void> {
-        if (this.options.logLevel > level) return;
-
-        const temp = data
-            .map((element) => {
-                if (typeof element === 'string') {
-                    return element;
-                } else if (
-                    typeof element === 'object' &&
-                    this.options.format === true
-                ) {
-                    return colorize(JSON.stringify(element), {
-                        indent: this.options.indent,
-                    });
-                } else if (typeof element === 'object') {
-                    return (
-                        JSON.stringify(element),
-                        {
-                            indent: this.options.indent,
-                        }
-                    );
-                } else {
-                    return String(element);
-                }
-            })
-            .join(' ');
-
-        let msg = '';
-
-        switch (level) {
-            case Level.trace:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(this.name)}${consoleColours.blue(
-                    ' [Trace] ',
-                )}${temp}`;
-                break;
-
-            case Level.debug:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(this.name)} ${consoleColours.cyan(
-                    '[Debug]',
-                )} ${temp}`;
-                break;
-
-            case Level.info:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(
-                    this.name,
-                )} ${consoleColours.blueBright('[Info]')} ${temp}`;
-                break;
-
-            case Level.warn:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(
-                    this.name,
-                )} ${consoleColours.yellow('[Warn]')} ${temp}`;
-                break;
-
-            case Level.error:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(
-                    this.name,
-                )} ${consoleColours.redBright('[Error]')} ${temp}`;
-                break;
-
-            case Level.fatal:
-                msg = `${consoleColours.grey(
-                    getTime(),
-                )} ${consoleColours.underline(
-                    this.name,
-                )} ${consoleColours.bgRed('[Fatal]')} ${temp}`;
-                break;
-            // Additional cases for other levels can be added here
-            default:
-                return; // Do nothing if level is not handled
-        }
-
-        console.log(msg);
-    }
-
-    /**
-     * trace
-     * @description Log a trace
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async trace(...data: Array<any>): Promise<void> {
-        return await this.log(Level.trace, ...data);
-    }
-    /**
-     * debug
-     * @description Log a debug line
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async debug(...data: Array<any>): Promise<void> {
-        return await this.log(Level.debug, ...data);
-    }
-
-    /**
-     * info
-     * @description Log a info line
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async info(...data: Array<any>): Promise<void> {
-        return await this.log(Level.info, ...data);
-    }
-
-    /**
-     * warn
-     * @description Log a warning
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async warn(...data: Array<any>): Promise<void> {
-        return await this.log(Level.warn, ...data);
-    }
-
-    /**
-     * error
-     * @description Log a error
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async error(...data: Array<any>): Promise<void> {
-        return await this.log(Level.error, ...data);
-    }
-
-    /**
-     * fatal
-     * @description Log a fatal error
-     * @argument data { Array<any> } Pass data or messages to log
-     */
-    public async fatal(...data: Array<any>): Promise<void> {
-        return await this.log(Level.fatal, ...data);
-    }
-
-    private internalLogging(message: string, ...data: Array<unknown>) {
-        if (this.options.logLevel && this.options.logLevel > Level.trace)
-            return;
-
-        console.log(
-            consoleColours.greenBright`[Internal] ` +
-                message +
-                consoleColours.green(
-                    ` ${JSON.stringify(data, null, this.options.indent)}`,
-                ),
-        );
-    }
+/**
+ * Optional enum of default levels. Corresponds to array
+ */
+export enum Level {
+	Trace = 0,
+	Debug = 1,
+	Info = 2,
+	Warn = 3,
+	Error = 4,
+	Fatal = 5,
 }
+
+class Logger {
+	[key: string]: ((...data: any[]) => void) | unknown;
+	name: string;
+	webData: any[] = [];
+	options: Options & {
+		levels: customLevel[];
+		functions: logFunction[];
+	};
+	funcs: Array<(level: Level, ...data: any[]) => void> = [];
+	constructor(name: string, options: Partial<Options> = {}) {
+		const defaults: Options & {
+			levels: customLevel[];
+			functions: logFunction[];
+		} = {
+			console: {
+				enabled: true,
+				format: false,
+				indent: 0,
+				logLevel: 1,
+				suppressWarnings: false,
+			},
+			files: { enabled: false },
+			web: { enabled: false },
+			levels: [
+				{ name: 'trace', colour: 'cyanBright' },
+				{ name: 'debug', colour: 'blueBG' },
+				{ name: 'info', colour: 'blue' },
+				{ name: 'warn', colour: 'yellow' },
+				{ name: 'error', colour: 'red' },
+				{ name: 'fatal', colour: 'redBG' },
+			],
+			functions: [],
+		};
+
+		if (options.functions) {
+			if (!Array.isArray(options.functions)) {
+				options.functions = [options.functions];
+			}
+
+			defaults.functions.push(...options.functions);
+			options.functions = undefined;
+		}
+		if (options.levels) {
+			if (!Array.isArray(options.levels)) {
+				options.levels = [options.levels];
+			}
+
+			defaults.levels.push(...options.levels);
+			options.levels = undefined;
+		}
+
+		// Above we check if options.functions and options.levels are arrays and if not convert them.
+		// Due to options.functions being its own individual type {function}, ts realises the change and inserts it.
+		// However, with options.levels being a object, this change does not happen and a TypeError is thrown here when we try to redefine the type.
+		//@ts-expect-error
+		this.options = merge<Options, Partial<Options>>(defaults, options);
+		this.name = name;
+
+		for (let i = 0; i < this.options.levels.length; i++) {
+			const level = this.options.levels[i];
+			this[level.name] = (...data: any[]) => {
+				try {
+					this.logs.console(i, ...data);
+					this.logs.files(i, ...data);
+					this.logs.funcs(i, ...data);
+					this.logs.web(i, ...data);
+				} catch (error) {
+					this.internalLogging(`threw ${error}`);
+				}
+			};
+		}
+
+		if (this.options.web.enabled) {
+			this.webCounter = this.options.web.every;
+		}
+	}
+	/**
+	 * Pushes custom handling functions on top of the already selected methods
+	 */
+	public addFunctions(
+		...funcs: Array<(level: Level, ...data: any[]) => void>
+	) {
+		this.funcs.push(...funcs);
+	}
+	/**
+	 * Sets the array of custom handling functions, replacing existing.
+	 */
+	public setFunctions(
+		...funcs: Array<(level: Level, ...data: any[]) => void>
+	) {
+		this.funcs = funcs;
+	}
+	private logs: {
+		console: (level: number, ...data: any[]) => void;
+		files: (level: number, ...data: any[]) => void;
+		web: (level: number, ...data: any[]) => void;
+		funcs: (level: number, ...data: any[]) => void;
+	} = {
+		console: async (level: number, ...data) => {
+			// Ensure that logging is enabled and the level is allowed by the logLevel
+			if (
+				!this.options.console.enabled ||
+				level < this.options.console.logLevel
+			) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					const jsonString = JSON.stringify(
+						v,
+						null,
+						this.options.console.indent,
+					);
+
+					message += ` ${
+						this.options.console.format
+							? colorize(jsonString, {
+									indent: this.options.console.indent,
+								})
+							: jsonString
+					}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			// Log the message with the corresponding color and level
+			console.log(
+				consoleColours.gray(getTime()),
+				consoleColours[this.options.levels[level].colour](
+					`[${this.options.levels[level].name}]`,
+				),
+				consoleColours.underline(this.name),
+				message.slice(1),
+			);
+		},
+		//TODO: Test this function.
+		files: async (level, ...data) => {
+			if (!this.options.files.enabled) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			if (this.options.files.type === 'json') {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
+
+				fs.appendFileSync(
+					this.options.files.path,
+					JSON.stringify({ level, data: message }),
+				);
+			} else {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
+
+				// Write data to the file
+				fs.appendFileSync(
+					this.options.files.path,
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
+			}
+		},
+		//TODO: Test this function.
+		web: async (level, ...data) => {
+			if (this.options.web.enabled === false) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			if (this.options.web.type === 'json') {
+				this.webData.push({ level, data: message });
+
+				// Check if enough data is collected to send
+				if (this.webData.length >= this.options.web.every) {
+					await axios
+						.post(
+							this.options.web.url,
+							JSON.stringify(this.webData),
+						)
+						.then((v) => {
+							if (v.status.toString().charAt(0) !== '2') {
+								this.options.web.enabled = false;
+								this.internalLogging(
+									`Got ${v.status} (${v.statusText}) and stopping requests.`,
+								);
+							}
+						});
+
+					// Clear the data after sending
+					this.webData = [];
+				}
+			} else {
+				this.webData.push(
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
+
+				if (this.webData.length >= this.options.web.every) {
+					const data = this.webData.join('\n');
+
+					await axios.post(this.options.web.url, data).then((v) => {
+						if (v.status.toString().charAt(0) !== '2') {
+							this.options.web.enabled = false;
+							this.internalLogging(
+								`Got ${v.status} (${v.statusText}) and stopping requests.`,
+							);
+						}
+					});
+
+					// Clear the data after sending
+					this.webData = [];
+				}
+			}
+		},
+		//TODO: Test this function.
+		funcs: async (level, ...data) => {
+			for (let index = 0; index < this.funcs.length; index++) {
+				const element = this.funcs[index];
+
+				try {
+					element(level, ...data);
+				} catch (err) {
+					this.internalLogging(
+						`Function at index ${index} threw "${err}"`,
+						'Removing due to unhandled error',
+					);
+
+					this.funcs.splice(index, 1);
+
+					index--;
+				}
+			}
+		},
+	};
+	private internalLogging(...data: string[]) {
+		if (this.options.console.enabled === true) {
+			if (this.options.console.logLevel > Level.Trace) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				message += `${data[i]} `;
+			}
+
+			console.log(
+				consoleColours.gray(getTime()),
+				consoleColours.greenBright(`[Internal]`),
+				message,
+			);
+		}
+	}
+}
+
+export { Logger };
+
+//* Types
+
+interface Options {
+	console: console;
+	files: files;
+	web: web;
+	levels: customLevel[] | customLevel;
+	functions: logFunction[] | logFunction;
+}
+
+export type customLevel = {
+	name: string;
+	colour: ColourList;
+};
+
+type console =
+	| {
+			/**
+			 * Whether console logging is enabled
+			 * @default true
+			 */
+			enabled: true;
+			/**
+			 * The minimum level to log
+			 * @see {Level}
+			 * @default Level.Debug
+			 */
+			logLevel: Level;
+			/**
+			 * Whether to suppress warnings or errors emitted by the logger
+			 * @default false
+			 */
+			suppressWarnings: boolean;
+			/**
+			 * Whether to format any JSON output
+			 * @default false
+			 */
+			format: boolean;
+			/**
+			 * Whether to indent any JSON output
+			 * @default false
+			 */
+			indent: number;
+	  }
+	| {
+			/**
+			 * Whether console logging is enabled
+			 * @default true
+			 */
+			enabled: false;
+	  };
+
+type files =
+	| {
+			/**
+			 * Whether file logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: true;
+			/**
+			 * The absolute path to the file to be logged in
+			 * @example /path/to/file = /path/to/file.json
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			path: string;
+			/**
+			 * How to name the files
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			name: string;
+			/**
+			 * The type of file stored
+			 * @default json
+			 * @ignore Incomplete section
+			 */
+			type: 'json' | 'txt';
+	  }
+	| {
+			/**
+			 * Whether file logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: false;
+	  };
+
+type web =
+	| {
+			/**
+			 * Whether web (POST) logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: true;
+			/**
+			 * The URL to post to
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			url: string;
+			/**
+			 * The data type sent
+			 * @default json
+			 * @ignore Incomplete section
+			 */
+			type: 'json' | 'txt';
+			/**
+			 * How many logs to store before POSTing to avoid getting ratelimited
+			 * @default 5
+			 * @ignore Incomplete section
+			 */
+			every: number;
+	  }
+	| {
+			/**
+			 * Whether web (POST) logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: false;
+	  };
+
+/**
+ * A custom function ran for every log.
+ */
+type logFunction = (level: Level, ...data: any[]) => void;
+
+/**
+ * @see colorList From package console-log-colors
+ */
+type ColourList =
+	| 'black'
+	| 'red'
+	| 'green'
+	| 'yellow'
+	| 'blue'
+	| 'magenta'
+	| 'cyan'
+	| 'white'
+	| 'gray'
+	| 'grey'
+	| 'redBright'
+	| 'greenBright'
+	| 'yellowBright'
+	| 'blueBright'
+	| 'magentaBright'
+	| 'cyanBright'
+	| 'whiteBright'
+	| 'bgBlack'
+	| 'bgRed'
+	| 'bgGreen'
+	| 'bgYellow'
+	| 'bgBlue'
+	| 'bgMagenta'
+	| 'bgCyan'
+	| 'bgWhite'
+	| 'blackBG'
+	| 'redBG'
+	| 'greenBG'
+	| 'yellowBG'
+	| 'blueBG'
+	| 'magentaBG'
+	| 'cyanBG'
+	| 'whiteBG'
+	| 'bgBlackBright'
+	| 'bgRedBright'
+	| 'bgGreenBright'
+	| 'bgYellowBright'
+	| 'bgBlueBright'
+	| 'bgMagentaBright'
+	| 'bgCyanBright'
+	| 'bgWhiteBright';

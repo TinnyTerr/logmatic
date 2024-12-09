@@ -1,6 +1,6 @@
-import { logger } from '../dist/es6/index.mjs';
+import { Logger } from '../dist/index.mjs';
 
-const log = new logger('test', { logLevel: 0 });
+const log = new Logger('test');
 
 log.trace('test trace');
 log.trace('test trace with data', { thisIs: true, andNot: false });
@@ -20,7 +20,7 @@ log.error('test error with data', { thisIs: true, andNot: false });
 log.fatal('test fatal');
 log.fatal('test fatal with data', { thisIs: true, andNot: false });
 
-const logIndent = new logger('test', { logLevel: 0, indent: 4 });
+const logIndent = new Logger('indent', { logLevel: 0, indent: 4 });
 
 logIndent.trace('test trace');
 logIndent.trace('test trace with data', { thisIs: true, andNot: false });
