@@ -1,5 +1,8 @@
 .github
 src
-test
-
+tests
+biome.json
 tsconfig.*
+CONTRIBUTING
+tsconfig.json
+tsup.config.ts

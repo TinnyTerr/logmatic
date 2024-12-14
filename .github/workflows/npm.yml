@@ -28,7 +28,7 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npm run compile
+      - run: npm run fullCompile
       # Publish to npm and GitHub Packages
       - name: Publish to npm
         run: npm publish --access public
