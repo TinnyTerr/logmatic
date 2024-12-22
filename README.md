@@ -12,6 +12,28 @@ For all systems, please use:
 ```bash
 npm i logmatic --save-exact
 ```
+
+### For Typescript
+
+Typescript seemingly has a vendetta against index signatures. Whenever possible, set the following setting in your `tsconfig.json` or such:
+
+```json
+{
+    "compilerOptions": {
+        // ...
+        "noPropertyAccessFromIndexSignature": false,
+        // ...
+    }
+}
+```
+
+Or you must use the following to access your logging statements:
+
+```ts
+log["fatal"]("a");
+```
+---
+
 As logmatic is currently in a very unstable state, many items may change in the future.
 
 ## Usage
