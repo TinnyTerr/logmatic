@@ -1,6 +1,6 @@
 const { Logger } = require('../dist/index.js');
 
-const log = new Logger('test');
+const log = new Logger('test').loggers;
 
 log.trace('test trace');
 log.trace('test trace with data', { thisIs: true, andNot: false });
@@ -22,7 +22,7 @@ log.fatal('test fatal with data', { thisIs: true, andNot: false });
 
 const logIndent = new Logger('indent', {
 	console: { logLevel: 0, format: true, indent: 4 },
-});
+}).loggers
 
 logIndent.trace('test trace');
 logIndent.trace('test trace with data', { thisIs: true, andNot: false });
