@@ -33,6 +33,7 @@ class Logger {
 		levels: customLevel[];
 		functions: logFunction[];
 	};
+	webCounter: number;
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
 	constructor(name: string, options: Partial<Options> = {}) {
 		const defaults: Options & {
@@ -85,7 +86,7 @@ class Logger {
 
 		for (let i = 0; i < this.options.levels.length; i++) {
 			const level = this.options.levels[i];
-			this[level.name] = (...data: any[]) => {
+			this.loggers[level.name] = (...data: any[]) => {
 				try {
 					this.logs.console(i, ...data);
 					this.logs.files(i, ...data);
@@ -101,6 +102,16 @@ class Logger {
 			this.webCounter = this.options.web.every;
 		}
 	}
+
+	loggers: {
+		[key: customLevel["name"]]: ((...data: any[]) => void);
+		trace: ((...data: any[]) => void);
+		debug: ((...data: any[]) => void);
+		info: ((...data: any[]) => void);
+		warn: ((...data: any[]) => void);
+		error: ((...data: any[]) => void);
+		fatal: ((...data: any[]) => void);
+	};
 	/**
 	 * Pushes custom handling functions on top of the already selected methods
 	 */
