@@ -1,0 +1,55 @@
+# .github/workflows/create-issue-on-failure.yml
+name: Create Issue on Workflow Failure
+
+on:
+  workflow_run:
+    workflows: ["Node Test"]  # List all workflows you want to monitor
+    types:
+      - completed
+
+jobs:
+  create_issue:
+    if: ${{ failure() }}  # Only run if the triggering workflow fails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Workflow Run Details
+        id: get_run
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const workflowRunId = context.workflow_run.id;
+            const runDetails = await github.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: workflowRunId
+            });
+            return runDetails;
+
+      - name: Fetch Failed Step Log (Optional)
+        id: fetch_logs
+        run: |
+          echo "Fetching logs of failed job..."
+          # Using GitHub API to download logs (Optional)
+          curl -L \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -o logs.zip \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ steps.get_run.outputs.run_id }}/logs"
+          unzip logs.zip -d logs
+
+      - name: Create Issue
+        uses: peter-evans/create-issue@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Workflow Failed: ${{ github.event.workflow_run.name }}"
+          body: |
+            The workflow **${{ github.event.workflow_run.name }}** failed.
+
+            **Job:** ${{ github.event.workflow_run.conclusion }}
+
+            ---
+            Logs:
+            ```
+            ${{ steps.fetch_logs.outputs.logs }}
+            ```
+
+            Please investigate the issue.
