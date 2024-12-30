@@ -45,8 +45,25 @@ const { Logger } = require('logmatic');
 // OR
 // import { Logger } from 'logmatic';
 
-const log = new Logger("name");
+const log = new Logger("name").loggers;
 ```
+
+WAIT! If you wish to alter the logger down the line (eg add logger handler functions), you will need to save the Logger class for later. The above code just accesses all the logger function. For example:
+
+```javascript
+const { Logger } = require('logmatic');
+// OR
+// import { Logger } from 'logmatic';
+
+const logClass = new Logger("name");
+const log = logClass.loggers
+
+// Do some stuff
+
+log.info("blah blah")
+
+logClass.addFunctions(() => { return })
+``` 
 
 For the default added levels, use the following: 
 
@@ -74,7 +91,7 @@ Whether console logging is enabled
 Default: `true`
 
 ```javascript
-const log = new Logger("name", { console: { enabled: true }})
+const log = new Logger("name", { console: { enabled: true }}).loggers
 ```
 ---
 #### Log Level
@@ -84,7 +101,7 @@ The minimum level to log. This corresponds with the position in the array the le
 Default: `1`
 
 ```javascript
-const log = new Logger("name", { console: { logLevel: 1 }})
+const log = new Logger("name", { console: { logLevel: 1 }}).loggers
 ```
 ---
 #### Suppress Warnings
@@ -96,7 +113,7 @@ Default: `false`
 **WARNING:** This option is currently not in use.
 
 ```javascript
-const log = new Logger("name", { console: { supressWarnings: false }})
+const log = new Logger("name", { console: { supressWarnings: false }}).loggers
 ```
 ---
 #### Format
@@ -106,7 +123,7 @@ Whether to format and colourise any JSON output
 Default: `false`
 
 ```javascript
-const log = new Logger("name", { console: { format: false }})
+const log = new Logger("name", { console: { format: false }}).loggers
 ```
 ---
 #### Indent
@@ -116,7 +133,7 @@ Whether to indent any JSON output
 Default: `0`
 
 ```javascript
-const log = new Logger("name", { console: { indent: 0 }})
+const log = new Logger("name", { console: { indent: 0 }}).loggers
 ```
 ---
 ### Files
@@ -131,7 +148,7 @@ Whether file logging is enabled
 Default: `false`
 
 ```javascript
-const log = new Logger("name", { files: { enabled: false }})
+const log = new Logger("name", { files: { enabled: false }}).loggers
 ```
 ---
 #### Path
@@ -143,7 +160,7 @@ In-depth: if path = `/path/to/dir/` then logs will be stored as `/path/to/dir/lo
 Default `null`
 
 ```javascript
-const log = new Logger("name", { files: { path: null }})
+const log = new Logger("name", { files: { path: null }}).loggers
 ```
 ---
 #### Naming
@@ -161,10 +178,13 @@ The type of file stored
 Default: `json`
 
 ```javascript
-const log = new Logger("name", { files: { type: "json" }})
+const log = new Logger("name", { files: { type: "json" }}).loggers
 ```
 ---
 ### Web
+
+**WARNING:** Web is currently in a unstable state and should not be used.
+
 #### Enabled
 
 Whether web (POST) logging is enabled
@@ -172,7 +192,7 @@ Whether web (POST) logging is enabled
 Default: `false`
 
 ```javascript
-const log = new Logger("name", { web: { enabled: false }})
+const log = new Logger("name", { web: { enabled: false }}).loggers
 ```
 ---
 #### URL
@@ -182,7 +202,7 @@ The URL to post to
 Default: `null`
 
 ```javascript
-const log = new Logger("name", { web: { url: null }})
+const log = new Logger("name", { web: { url: null }}).loggers
 ```
 ---
 #### Data Type
@@ -192,7 +212,7 @@ The data type sent
 Default: `json`
 
 ```javascript
-const log = new Logger("name", { web: { type: "json" }})
+const log = new Logger("name", { web: { type: "json" }}).loggers
 ```
 ---
 #### Every number
@@ -202,7 +222,7 @@ How many logs to store before POSTing to avoid getting ratelimited
 Default: `5`
 
 ```javascript
-const log = new Logger("name", { web: { every: 5 }})
+const log = new Logger("name", { web: { every: 5 }}).loggers
 ```
 
 ---
@@ -210,9 +230,9 @@ const log = new Logger("name", { web: { every: 5 }})
 
 This logger allows you to add your own levels, following out format. Formatted the following:
 ```javascript
-const log = new Logger("name", { levels: { name: "level", colour:"red" }})
+const log = new Logger("name", { levels: { name: "level", colour:"red" }}).loggers
 // **OR**
-const log = new Logger("name", { levels: [{ name: "level", colour:"red" }]})
+const log = new Logger("name", { levels: [{ name: "level", colour:"red" }]}).loggers
 ```
 
 The colour should be derived from the package [console-log-colors](https://www.npmjs.com/package/console-log-colors) or from a slimmed list included in the types.
@@ -228,8 +248,8 @@ const function = (level: number, ...data: any[]) => {
     return { level, data }
 }
 
-const log = new Logger("name", { funcs: function});
+const log = new Logger("name", { funcs: function}).loggers
 // **OR**
-const log = new Logger("name", { funcs: [function]});
+const log = new Logger("name", { funcs: [function]}).loggers
 
 ```
