@@ -83,6 +83,9 @@ class Logger {
 		//@ts-expect-error
 		this.options = merge<Options, Partial<Options>>(defaults, options);
 		this.name = name;
+		//@ts-expect-error 
+		// We are setting these values...
+		this.loggers = {}
 
 		for (let i = 0; i < this.options.levels.length; i++) {
 			const level = this.options.levels[i];
