@@ -128,7 +128,8 @@ const log = new Logger("name", { console: { format: false }}).loggers
 ---
 #### Indent
 
-Whether to indent any JSON output
+Whether to indent any JSON output.
+[Console.format](#format) must be true if [Console.indent](#indent) is greater than `0`
 
 Default: `0`
 

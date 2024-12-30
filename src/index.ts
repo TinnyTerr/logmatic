@@ -306,6 +306,9 @@ class Logger {
 				}
 			},
 		};
+	/**
+	 * @internal
+	 */
 	private internalLogging(...data: string[]) {
 		if (this.options.console.enabled === true) {
 			if (this.options.console.logLevel > Level.Trace) {
@@ -369,6 +372,8 @@ type console =
 		format: boolean;
 		/**
 		 * Whether to indent any JSON output
+		 * 
+		 * {@link console.format} must be true if {@link console.indent} is greater than `0`
 		 * @default false
 		 */
 		indent: number;
