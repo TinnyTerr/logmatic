@@ -5,6 +5,7 @@ For anyone interested with supporting this passion project, please check out [Co
 # Logmatic
 
 An overly complicated yet functional logger.
+Package: [@tinnyterr/logmatic](https://www.npmjs.com/package/@tinnyterr/logmatic)
 
 ## Installation
 
@@ -15,7 +16,7 @@ npm i logmatic --save-exact
 
 ### For Typescript
 
-Typescript seemingly has a vendetta against index signatures. Whenever possible, set the following setting in your `tsconfig.json` or such:
+Whenever possible, set the following setting in your `tsconfig.json` or such:
 
 ```json
 {
@@ -41,9 +42,9 @@ As logmatic is currently in a very unstable state, many items may change in the 
 To get started, import the project into your file and initialise the logger:
 
 ```javascript
-const { Logger } = require('logmatic');
+const { Logger } = require('@tinnyterr/logmatic');
 // OR
-// import { Logger } from 'logmatic';
+// import { Logger } from '@tinnyterr/logmatic';
 
 const log = new Logger("name").loggers;
 ```
@@ -51,9 +52,9 @@ const log = new Logger("name").loggers;
 WAIT! If you wish to alter the logger down the line (eg add logger handler functions), you will need to save the Logger class for later. The above code just accesses all the logger function. For example:
 
 ```javascript
-const { Logger } = require('logmatic');
+const { Logger } = require('@tinnyterr/logmatic');
 // OR
-// import { Logger } from 'logmatic';
+// import { Logger } from '@tinnyterr/logmatic';
 
 const logClass = new Logger("name");
 const log = logClass.loggers
