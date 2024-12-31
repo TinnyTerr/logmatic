@@ -35,7 +35,7 @@ class Logger {
 	};
 	webCounter: number;
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
-	constructor(name: string, options: Partial<Options> = {}) {
+	constructor(name: string, options: Partial<ClassOptions> = {}) {
 		const defaults: Options & {
 			levels: customLevel[];
 			functions: logFunction[];
@@ -338,6 +338,14 @@ interface Options {
 	console: console;
 	files: files;
 	web: web;
+	levels: customLevel[] | customLevel;
+	functions: logFunction[] | logFunction;
+}
+
+interface ClassOptions {
+	console: Partial<console>;
+	files: Partial<files>;
+	web: Partial<web>;
 	levels: customLevel[] | customLevel;
 	functions: logFunction[] | logFunction;
 }
