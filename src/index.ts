@@ -26,7 +26,6 @@ export enum Level {
 }
 
 class Logger {
-
 	name: string;
 	webData: any[] = [];
 	options: Options & {
@@ -34,7 +33,7 @@ class Logger {
 		functions: logFunction[];
 	};
 	webCounter: number;
-	funcs: Array<(level: Level, ...data: any[]) => void> = [];
+	funcs: Array<(level: Level, ...data: any[]) => void>;
 	constructor(name: string, options: Partial<ClassOptions> = {}) {
 		const defaults: Options & {
 			levels: customLevel[];
@@ -65,7 +64,7 @@ class Logger {
 				options.functions = [options.functions];
 			}
 
-			defaults.functions.push(...options.functions);
+			this.funcs.push(...options.functions);
 			options.functions = undefined;
 		}
 		if (options.levels) {
@@ -83,9 +82,9 @@ class Logger {
 		//@ts-expect-error
 		this.options = merge<Options, Partial<Options>>(defaults, options);
 		this.name = name;
-		//@ts-expect-error 
+		//@ts-expect-error
 		// We are setting these values...
-		this.loggers = {}
+		this.loggers = {};
 
 		for (let i = 0; i < this.options.levels.length; i++) {
 			const level = this.options.levels[i];
@@ -107,13 +106,13 @@ class Logger {
 	}
 
 	loggers: {
-		[key: customLevel["name"]]: ((...data: any[]) => void);
-		trace: ((...data: any[]) => void);
-		debug: ((...data: any[]) => void);
-		info: ((...data: any[]) => void);
-		warn: ((...data: any[]) => void);
-		error: ((...data: any[]) => void);
-		fatal: ((...data: any[]) => void);
+		[key: customLevel['name']]: (...data: any[]) => void;
+		trace: (...data: any[]) => void;
+		debug: (...data: any[]) => void;
+		info: (...data: any[]) => void;
+		warn: (...data: any[]) => void;
+		error: (...data: any[]) => void;
+		fatal: (...data: any[]) => void;
 	};
 	/**
 	 * Pushes custom handling functions on top of the already selected methods
@@ -137,142 +136,123 @@ class Logger {
 		web: (level: number, ...data: any[]) => void;
 		funcs: (level: number, ...data: any[]) => void;
 	} = {
-			console: async (level: number, ...data) => {
-				// Ensure that logging is enabled and the level is allowed by the logLevel
-				if (
-					!this.options.console.enabled ||
-					level < this.options.console.logLevel
-				) {
-					return;
-				}
+		console: async (level: number, ...data) => {
+			// Ensure that logging is enabled and the level is allowed by the logLevel
+			if (
+				!this.options.console.enabled ||
+				level < this.options.console.logLevel
+			) {
+				return;
+			}
 
-				let message = '';
+			let message = '';
 
-				for (let i = 0; i < data.length; i++) {
-					const v = data[i];
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
 
-					if (typeof v === 'string') {
-						message += ` ${v}`;
-					} else if (typeof v === 'object') {
-						const jsonString = JSON.stringify(
-							v,
-							null,
-							this.options.console.indent,
-						);
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					const jsonString = JSON.stringify(
+						v,
+						null,
+						this.options.console.indent,
+					);
 
-						message += ` ${this.options.console.format
+					message += ` ${
+						this.options.console.format
 							? colorize(jsonString, {
-								indent: this.options.console.indent,
-							})
+									indent: this.options.console.indent,
+								})
 							: jsonString
-							}`;
-					} else {
-						message += ` ${String(v)}`;
-					}
+					}`;
+				} else {
+					message += ` ${String(v)}`;
 				}
+			}
 
-				// Log the message with the corresponding color and level
-				console.log(
-					consoleColours.gray(getTime()),
-					consoleColours[this.options.levels[level].colour](
-						`[${this.options.levels[level].name}]`,
-					),
-					consoleColours.underline(this.name),
-					message.slice(1),
+			// Log the message with the corresponding color and level
+			console.log(
+				consoleColours.gray(getTime()),
+				consoleColours[this.options.levels[level].colour](
+					`[${this.options.levels[level].name}]`,
+				),
+				consoleColours.underline(this.name),
+				message.slice(1),
+			);
+		},
+		//TODO: Test this function.
+		files: async (level, ...data) => {
+			if (!this.options.files.enabled) {
+				return;
+			}
+
+			let message = '';
+
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
+
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
+				} else {
+					message += ` ${String(v)}`;
+				}
+			}
+
+			if (this.options.files.type === 'json') {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
+
+				fs.appendFileSync(
+					this.options.files.path,
+					JSON.stringify({ level, data: message }),
 				);
-			},
-			//TODO: Test this function.
-			files: async (level, ...data) => {
-				if (!this.options.files.enabled) {
-					return;
-				}
+			} else {
+				fs.mkdirSync(path.dirname(this.options.files.path), {
+					recursive: true,
+				});
 
-				let message = '';
+				// Write data to the file
+				fs.appendFileSync(
+					this.options.files.path,
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
+			}
+		},
+		//TODO: Test this function.
+		web: async (level, ...data) => {
+			if (this.options.web.enabled === false) {
+				return;
+			}
 
-				for (let i = 0; i < data.length; i++) {
-					const v = data[i];
+			let message = '';
 
-					if (typeof v === 'string') {
-						message += ` ${v}`;
-					} else if (typeof v === 'object') {
-						message += ` ${JSON.stringify(v)}`;
-					} else {
-						message += ` ${String(v)}`;
-					}
-				}
+			for (let i = 0; i < data.length; i++) {
+				const v = data[i];
 
-				if (this.options.files.type === 'json') {
-					fs.mkdirSync(path.dirname(this.options.files.path), {
-						recursive: true,
-					});
-
-					fs.appendFileSync(
-						this.options.files.path,
-						JSON.stringify({ level, data: message }),
-					);
+				if (typeof v === 'string') {
+					message += ` ${v}`;
+				} else if (typeof v === 'object') {
+					message += ` ${JSON.stringify(v)}`;
 				} else {
-					fs.mkdirSync(path.dirname(this.options.files.path), {
-						recursive: true,
-					});
-
-					// Write data to the file
-					fs.appendFileSync(
-						this.options.files.path,
-						`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
-					);
+					message += ` ${String(v)}`;
 				}
-			},
-			//TODO: Test this function.
-			web: async (level, ...data) => {
-				if (this.options.web.enabled === false) {
-					return;
-				}
+			}
 
-				let message = '';
+			if (this.options.web.type === 'json') {
+				this.webData.push({ level, data: message });
 
-				for (let i = 0; i < data.length; i++) {
-					const v = data[i];
-
-					if (typeof v === 'string') {
-						message += ` ${v}`;
-					} else if (typeof v === 'object') {
-						message += ` ${JSON.stringify(v)}`;
-					} else {
-						message += ` ${String(v)}`;
-					}
-				}
-
-				if (this.options.web.type === 'json') {
-					this.webData.push({ level, data: message });
-
-					// Check if enough data is collected to send
-					if (this.webData.length >= this.options.web.every) {
-						await axios
-							.post(
-								this.options.web.url,
-								JSON.stringify(this.webData),
-							)
-							.then((v) => {
-								if (v.status.toString().charAt(0) !== '2') {
-									this.options.web.enabled = false;
-									this.internalLogging(
-										`Got ${v.status} (${v.statusText}) and stopping requests.`,
-									);
-								}
-							});
-
-						// Clear the data after sending
-						this.webData = [];
-					}
-				} else {
-					this.webData.push(
-						`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
-					);
-
-					if (this.webData.length >= this.options.web.every) {
-						const data = this.webData.join('\n');
-
-						await axios.post(this.options.web.url, data).then((v) => {
+				// Check if enough data is collected to send
+				if (this.webData.length >= this.options.web.every) {
+					await axios
+						.post(
+							this.options.web.url,
+							JSON.stringify(this.webData),
+						)
+						.then((v) => {
 							if (v.status.toString().charAt(0) !== '2') {
 								this.options.web.enabled = false;
 								this.internalLogging(
@@ -281,31 +261,51 @@ class Logger {
 							}
 						});
 
-						// Clear the data after sending
-						this.webData = [];
-					}
+					// Clear the data after sending
+					this.webData = [];
 				}
-			},
-			//TODO: Test this function.
-			funcs: async (level, ...data) => {
-				for (let index = 0; index < this.funcs.length; index++) {
-					const element = this.funcs[index];
+			} else {
+				this.webData.push(
+					`${getTime()} [${this.options.levels[level].name}] ${this.name} ${message.slice(1)}`,
+				);
 
-					try {
-						element(level, ...data);
-					} catch (err) {
-						this.internalLogging(
-							`Function at index ${index} threw "${err}"`,
-							'Removing due to unhandled error',
-						);
+				if (this.webData.length >= this.options.web.every) {
+					const data = this.webData.join('\n');
 
-						this.funcs.splice(index, 1);
+					await axios.post(this.options.web.url, data).then((v) => {
+						if (v.status.toString().charAt(0) !== '2') {
+							this.options.web.enabled = false;
+							this.internalLogging(
+								`Got ${v.status} (${v.statusText}) and stopping requests.`,
+							);
+						}
+					});
 
-						index--;
-					}
+					// Clear the data after sending
+					this.webData = [];
 				}
-			},
-		};
+			}
+		},
+		//TODO: Test this function.
+		funcs: async (level, ...data) => {
+			for (let index = 0; index < this.funcs.length; index++) {
+				const element = this.funcs[index];
+
+				try {
+					element(level, ...data);
+				} catch (err) {
+					this.internalLogging(
+						`Function at index ${index} threw "${err}"`,
+						'Removing due to unhandled error',
+					);
+
+					this.funcs.splice(index, 1);
+
+					index--;
+				}
+			}
+		},
+	};
 	/**
 	 * @internal
 	 */
@@ -357,115 +357,115 @@ export type customLevel = {
 
 type console =
 	| {
-		/**
-		 * Whether console logging is enabled
-		 * @default true
-		 */
-		enabled: true;
-		/**
-		 * The minimum level to log
-		 * @see {Level}
-		 * @default Level.Debug
-		 */
-		logLevel: Level;
-		/**
-		 * Whether to suppress warnings or errors emitted by the logger
-		 * @default false
-		 */
-		suppressWarnings: boolean;
-		/**
-		 * Whether to format any JSON output
-		 * @default false
-		 */
-		format: boolean;
-		/**
-		 * Whether to indent any JSON output
-		 * 
-		 * {@link console.format} must be true if {@link console.indent} is greater than `0`
-		 * @default false
-		 */
-		indent: number;
-	}
+			/**
+			 * Whether console logging is enabled
+			 * @default true
+			 */
+			enabled: true;
+			/**
+			 * The minimum level to log
+			 * @see {Level}
+			 * @default Level.Debug
+			 */
+			logLevel: Level;
+			/**
+			 * Whether to suppress warnings or errors emitted by the logger
+			 * @default false
+			 */
+			suppressWarnings: boolean;
+			/**
+			 * Whether to format any JSON output
+			 * @default false
+			 */
+			format: boolean;
+			/**
+			 * Whether to indent any JSON output
+			 *
+			 * {@link console.format} must be true if {@link console.indent} is greater than `0`
+			 * @default false
+			 */
+			indent: number;
+	  }
 	| {
-		/**
-		 * Whether console logging is enabled
-		 * @default true
-		 */
-		enabled: false;
-	};
+			/**
+			 * Whether console logging is enabled
+			 * @default true
+			 */
+			enabled: false;
+	  };
 
 type files =
 	| {
-		/**
-		 * Whether file logging is enabled
-		 * @default false
-		 * @ignore Incomplete section
-		 */
-		enabled: true;
-		/**
-		 * The absolute path to the file to be logged in
-		 * @example /path/to/file = /path/to/file.json
-		 * @default null
-		 * @ignore Incomplete section
-		 */
-		path: string;
-		/**
-		 * How to name the files
-		 * @default null
-		 * @ignore Incomplete section
-		 */
-		name: string;
-		/**
-		 * The type of file stored
-		 * @default json
-		 * @ignore Incomplete section
-		 */
-		type: 'json' | 'txt';
-	}
+			/**
+			 * Whether file logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: true;
+			/**
+			 * The absolute path to the file to be logged in
+			 * @example /path/to/file = /path/to/file.json
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			path: string;
+			/**
+			 * How to name the files
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			name: string;
+			/**
+			 * The type of file stored
+			 * @default json
+			 * @ignore Incomplete section
+			 */
+			type: 'json' | 'txt';
+	  }
 	| {
-		/**
-		 * Whether file logging is enabled
-		 * @default false
-		 * @ignore Incomplete section
-		 */
-		enabled: false;
-	};
+			/**
+			 * Whether file logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: false;
+	  };
 
 type web =
 	| {
-		/**
-		 * Whether web (POST) logging is enabled
-		 * @default false
-		 * @ignore Incomplete section
-		 */
-		enabled: true;
-		/**
-		 * The URL to post to
-		 * @default null
-		 * @ignore Incomplete section
-		 */
-		url: string;
-		/**
-		 * The data type sent
-		 * @default json
-		 * @ignore Incomplete section
-		 */
-		type: 'json' | 'txt';
-		/**
-		 * How many logs to store before POSTing to avoid getting ratelimited
-		 * @default 5
-		 * @ignore Incomplete section
-		 */
-		every: number;
-	}
+			/**
+			 * Whether web (POST) logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: true;
+			/**
+			 * The URL to post to
+			 * @default null
+			 * @ignore Incomplete section
+			 */
+			url: string;
+			/**
+			 * The data type sent
+			 * @default json
+			 * @ignore Incomplete section
+			 */
+			type: 'json' | 'txt';
+			/**
+			 * How many logs to store before POSTing to avoid getting ratelimited
+			 * @default 5
+			 * @ignore Incomplete section
+			 */
+			every: number;
+	  }
 	| {
-		/**
-		 * Whether web (POST) logging is enabled
-		 * @default false
-		 * @ignore Incomplete section
-		 */
-		enabled: false;
-	};
+			/**
+			 * Whether web (POST) logging is enabled
+			 * @default false
+			 * @ignore Incomplete section
+			 */
+			enabled: false;
+	  };
 
 /**
  * A custom function ran for every log.
