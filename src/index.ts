@@ -3,9 +3,6 @@ import { colorize } from 'json-colorizer';
 import axios from 'axios';
 import fs from 'node:fs';
 import path from 'node:path';
-// !Module support!
-import pkg from 'lodash';
-const { merge } = pkg;
 
 function getTime(): string {
 	const now = new Date();
@@ -33,59 +30,81 @@ class Logger {
 		functions: logFunction[];
 	};
 	webCounter: number;
-	funcs: Array<(level: Level, ...data: any[]) => void>;
+	funcs: Array<(level: Level, ...data: any[]) => void> = [];
 	constructor(name: string, options: Partial<ClassOptions> = {}) {
-		const defaults: Options & {
-			levels: customLevel[];
-			functions: logFunction[];
-		} = {
-			console: {
-				enabled: true,
-				format: false,
-				indent: 0,
-				logLevel: 1,
-				suppressWarnings: false,
-			},
-			files: { enabled: false },
-			web: { enabled: false },
-			levels: [
-				{ name: 'trace', colour: 'cyanBright' },
-				{ name: 'debug', colour: 'blueBG' },
-				{ name: 'info', colour: 'blue' },
-				{ name: 'warn', colour: 'yellow' },
-				{ name: 'error', colour: 'red' },
-				{ name: 'fatal', colour: 'redBG' },
-			],
-			functions: [],
+		this.name = name;
+		this.webData = [];
+		this.funcs = [];
+
+		// Normalize levels and functions
+		const normalizedLevels = options.levels
+			? Array.isArray(options.levels)
+				? options.levels
+				: [options.levels]
+			: [];
+
+		const normalizedFunctions: logFunction[] = Array.isArray(
+			options.functions,
+		)
+			? options.functions
+			: options.functions
+				? [options.functions]
+				: [];
+
+		// Default options
+		const defaultLevels: customLevel[] = [
+			{ name: 'trace', colour: 'cyanBright' },
+			{ name: 'debug', colour: 'blueBG' },
+			{ name: 'info', colour: 'blue' },
+			{ name: 'warn', colour: 'yellow' },
+			{ name: 'error', colour: 'red' },
+			{ name: 'fatal', colour: 'redBG' },
+		];
+
+		const defaultConsole: console =
+			options.console?.enabled === false
+				? { enabled: false }
+				: {
+						enabled: true,
+						logLevel: options.console?.logLevel ?? Level.Debug,
+						suppressWarnings:
+							options.console?.suppressWarnings ?? false,
+						format: options.console?.format ?? false,
+						indent: options.console?.indent ?? 0,
+					};
+
+		const defaultFiles: files =
+			options.files?.enabled === true
+				? {
+						enabled: true,
+						path: options.files?.path ?? '',
+						name: options.files?.name ?? '',
+						type: options.files?.type ?? 'json',
+					}
+				: { enabled: false };
+
+		const defaultWeb: web =
+			options.web?.enabled === true
+				? {
+						enabled: true,
+						url: options.web?.url ?? '',
+						type: options.web?.type ?? 'json',
+						every: options.web?.every ?? 5,
+					}
+				: { enabled: false };
+
+		this.options = {
+			console: defaultConsole,
+			files: defaultFiles,
+			web: defaultWeb,
+			levels: [...defaultLevels, ...normalizedLevels],
+			functions: normalizedFunctions,
 		};
 
-		if (options.functions) {
-			if (!Array.isArray(options.functions)) {
-				options.functions = [options.functions];
-			}
+		this.funcs = normalizedFunctions ?? [];
+		this.loggers = {} as Logger['loggers'];
 
-			this.funcs.push(...options.functions);
-			options.functions = undefined;
-		}
-		if (options.levels) {
-			if (!Array.isArray(options.levels)) {
-				options.levels = [options.levels];
-			}
-
-			defaults.levels.push(...options.levels);
-			options.levels = undefined;
-		}
-
-		// Above we check if options.functions and options.levels are arrays and if not convert them.
-		// Due to options.functions being its own individual type {function}, ts realises the change and inserts it.
-		// However, with options.levels being a object, this change does not happen and a TypeError is thrown here when we try to redefine the type.
-		//@ts-expect-error
-		this.options = merge<Options, Partial<Options>>(defaults, options);
-		this.name = name;
-		//@ts-expect-error
-		// We are setting these values...
-		this.loggers = {};
-
+		// Generate logger functions
 		for (let i = 0; i < this.options.levels.length; i++) {
 			const level = this.options.levels[i];
 			this.loggers[level.name] = (...data: any[]) => {
@@ -100,20 +119,39 @@ class Logger {
 			};
 		}
 
+		// Required to satisfy declared fields
+		this.loggers.trace ||= () => {
+			/* no empty blocks guys!!! */
+		};
+		this.loggers.debug ||= () => {
+			/* no empty blocks guys!!! */
+		};
+		this.loggers.info ||= () => {
+			/* no empty blocks guys!!! */
+		};
+		this.loggers.warn ||= () => {
+			/* no empty blocks guys!!! */
+		};
+		this.loggers.error ||= () => {
+			/* no empty blocks guys!!! */
+		};
+		this.loggers.fatal ||= () => {
+			/* no empty blocks guys!!! */
+		};
+
 		if (this.options.web.enabled) {
 			this.webCounter = this.options.web.every;
 		}
 	}
 
 	loggers: {
-		[key: customLevel['name']]: (...data: any[]) => void;
 		trace: (...data: any[]) => void;
 		debug: (...data: any[]) => void;
 		info: (...data: any[]) => void;
 		warn: (...data: any[]) => void;
 		error: (...data: any[]) => void;
 		fatal: (...data: any[]) => void;
-	};
+	} & Record<string, (...data: any[]) => void>;
 	/**
 	 * Pushes custom handling functions on top of the already selected methods
 	 */
