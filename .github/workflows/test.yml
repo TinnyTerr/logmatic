@@ -12,5 +12,5 @@ jobs:
         with:
           node-version: 20
       - run: chmod 755 *
-      - run: npm ci
+      - run: npm i
       - run: npm test
