@@ -1,6 +1,6 @@
 {
     "name": "@tinnyterr/logmatic",
-    "version": "2.4.0",
+    "version": "2.4.1",
     "homepage": "https://github.com/tinnyterr/logmatic#readme",
     "bugs": {
         "url": "https://github.com/tinnyterr/logmatic/issues"
@@ -26,20 +26,11 @@
     },
     "devDependencies": {
         "@types/lodash": "^4.17.13",
-        "@types/node": "22.10.2",
-        "@typescript-eslint/eslint-plugin": "7.5.0",
-        "@typescript-eslint/parser": "7.5.0",
-        "eslint": "8.57.0",
-        "eslint-config-prettier": "9.1.0",
-        "eslint-plugin-jest": "28.10.0",
-        "eslint-plugin-prettier": "4.2.1",
-        "eslint-plugin-simple-import-sort": "12.1.1",
-        "eslint-plugin-sort-class-members": "1.20.0",
-        "prettier": "2.8.8",
-        "typescript": "5.7.2"
+        "@types/node": "24.5.2",
+        "@biomejs/biome": "^2.2.4",
+        "typescript": "5.9.2"
     },
     "dependencies": {
-        "@biomejs/biome": "^1.9.4",
         "axios": "^1.7.9",
         "console-log-colors": "^0.5.0",
         "json-colorizer": "^3.0.1",
