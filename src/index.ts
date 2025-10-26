@@ -1,13 +1,13 @@
-import consoleColours from 'console-log-colors';
-import { colorize } from 'json-colorizer';
-import axios from 'axios';
-import fs from 'node:fs';
-import path from 'node:path';
+import consoleColours from "console-log-colors";
+import { colorize } from "json-colorizer";
+import axios from "axios";
+import fs from "node:fs";
+import path from "node:path";
 
 function getTime(): string {
 	const now = new Date();
 	const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-	return date.toISOString().replace(/.*T(.*)Z/, '$1');
+	return date.toISOString().replace(/.*T(.*)Z/, "$1");
 }
 
 /**
@@ -43,9 +43,7 @@ class Logger {
 				: [options.levels]
 			: [];
 
-		const normalizedFunctions: logFunction[] = Array.isArray(
-			options.functions,
-		)
+		const normalizedFunctions: logFunction[] = Array.isArray(options.functions)
 			? options.functions
 			: options.functions
 				? [options.functions]
@@ -53,12 +51,12 @@ class Logger {
 
 		// Default options
 		const defaultLevels: customLevel[] = [
-			{ name: 'trace', colour: 'cyanBright' },
-			{ name: 'debug', colour: 'blueBG' },
-			{ name: 'info', colour: 'blue' },
-			{ name: 'warn', colour: 'yellow' },
-			{ name: 'error', colour: 'red' },
-			{ name: 'fatal', colour: 'redBG' },
+			{ name: "trace", colour: "cyanBright" },
+			{ name: "debug", colour: "blueBG" },
+			{ name: "info", colour: "blue" },
+			{ name: "warn", colour: "yellow" },
+			{ name: "error", colour: "red" },
+			{ name: "fatal", colour: "redBG" },
 		];
 
 		const defaultConsole: console =
@@ -67,8 +65,7 @@ class Logger {
 				: {
 						enabled: true,
 						logLevel: options.console?.logLevel ?? Level.Debug,
-						suppressWarnings:
-							options.console?.suppressWarnings ?? false,
+						suppressWarnings: options.console?.suppressWarnings ?? false,
 						format: options.console?.format ?? false,
 						indent: options.console?.indent ?? 0,
 					};
@@ -77,9 +74,9 @@ class Logger {
 			options.files?.enabled === true
 				? {
 						enabled: true,
-						path: options.files?.path ?? '',
-						name: options.files?.name ?? '',
-						type: options.files?.type ?? 'json',
+						path: options.files?.path ?? "",
+						name: options.files?.name ?? "",
+						type: options.files?.type ?? "json",
 					}
 				: { enabled: false };
 
@@ -87,8 +84,8 @@ class Logger {
 			options.web?.enabled === true
 				? {
 						enabled: true,
-						url: options.web?.url ?? '',
-						type: options.web?.type ?? 'json',
+						url: options.web?.url ?? "",
+						type: options.web?.type ?? "json",
 						every: options.web?.every ?? 5,
 					}
 				: { enabled: false };
@@ -102,7 +99,7 @@ class Logger {
 		};
 
 		this.funcs = normalizedFunctions ?? [];
-		this.loggers = {} as Logger['loggers'];
+		this.loggers = {} as Logger["loggers"];
 
 		// Generate logger functions
 		for (let i = 0; i < this.options.levels.length; i++) {
@@ -155,17 +152,13 @@ class Logger {
 	/**
 	 * Pushes custom handling functions on top of the already selected methods
 	 */
-	public addFunctions(
-		...funcs: Array<(level: Level, ...data: any[]) => void>
-	) {
+	public addFunctions(...funcs: Array<(level: Level, ...data: any[]) => void>) {
 		this.funcs.push(...funcs);
 	}
 	/**
 	 * Sets the array of custom handling functions, replacing existing.
 	 */
-	public setFunctions(
-		...funcs: Array<(level: Level, ...data: any[]) => void>
-	) {
+	public setFunctions(...funcs: Array<(level: Level, ...data: any[]) => void>) {
 		this.funcs = funcs;
 	}
 	private logs: {
@@ -183,14 +176,14 @@ class Logger {
 				return;
 			}
 
-			let message = '';
+			let message = "";
 
 			for (let i = 0; i < data.length; i++) {
 				const v = data[i];
 
-				if (typeof v === 'string') {
+				if (typeof v === "string") {
 					message += ` ${v}`;
-				} else if (typeof v === 'object') {
+				} else if (typeof v === "object") {
 					const jsonString = JSON.stringify(
 						v,
 						null,
@@ -209,13 +202,26 @@ class Logger {
 				}
 			}
 
+			const time = getTime();
+
+			const title = [
+				time,
+				`[${this.options.levels[level].name}]`,
+				this.name,
+			].join(" ");
+
+			// TODO: make this an option
+			const indent = `\n${" ".repeat(title.length - 1)}>`;
+			message = message.replace(/\n/g, indent);
+
 			// Log the message with the corresponding color and level
 			console.log(
-				consoleColours.gray(getTime()),
+				consoleColours.gray(time),
 				consoleColours[this.options.levels[level].colour](
 					`[${this.options.levels[level].name}]`,
 				),
 				consoleColours.underline(this.name),
+				consoleColours.reset(""),
 				message.slice(1),
 			);
 		},
@@ -225,21 +231,21 @@ class Logger {
 				return;
 			}
 
-			let message = '';
+			let message = "";
 
 			for (let i = 0; i < data.length; i++) {
 				const v = data[i];
 
-				if (typeof v === 'string') {
+				if (typeof v === "string") {
 					message += ` ${v}`;
-				} else if (typeof v === 'object') {
+				} else if (typeof v === "object") {
 					message += ` ${JSON.stringify(v)}`;
 				} else {
 					message += ` ${String(v)}`;
 				}
 			}
 
-			if (this.options.files.type === 'json') {
+			if (this.options.files.type === "json") {
 				fs.mkdirSync(path.dirname(this.options.files.path), {
 					recursive: true,
 				});
@@ -266,32 +272,29 @@ class Logger {
 				return;
 			}
 
-			let message = '';
+			let message = "";
 
 			for (let i = 0; i < data.length; i++) {
 				const v = data[i];
 
-				if (typeof v === 'string') {
+				if (typeof v === "string") {
 					message += ` ${v}`;
-				} else if (typeof v === 'object') {
+				} else if (typeof v === "object") {
 					message += ` ${JSON.stringify(v)}`;
 				} else {
 					message += ` ${String(v)}`;
 				}
 			}
 
-			if (this.options.web.type === 'json') {
+			if (this.options.web.type === "json") {
 				this.webData.push({ level, data: message });
 
 				// Check if enough data is collected to send
 				if (this.webData.length >= this.options.web.every) {
 					await axios
-						.post(
-							this.options.web.url,
-							JSON.stringify(this.webData),
-						)
+						.post(this.options.web.url, JSON.stringify(this.webData))
 						.then((v) => {
-							if (v.status.toString().charAt(0) !== '2') {
+							if (v.status.toString().charAt(0) !== "2") {
 								this.options.web.enabled = false;
 								this.internalLogging(
 									`Got ${v.status} (${v.statusText}) and stopping requests.`,
@@ -308,10 +311,10 @@ class Logger {
 				);
 
 				if (this.webData.length >= this.options.web.every) {
-					const data = this.webData.join('\n');
+					const data = this.webData.join("\n");
 
 					await axios.post(this.options.web.url, data).then((v) => {
-						if (v.status.toString().charAt(0) !== '2') {
+						if (v.status.toString().charAt(0) !== "2") {
 							this.options.web.enabled = false;
 							this.internalLogging(
 								`Got ${v.status} (${v.statusText}) and stopping requests.`,
@@ -334,7 +337,7 @@ class Logger {
 				} catch (err) {
 					this.internalLogging(
 						`Function at index ${index} threw "${err}"`,
-						'Removing due to unhandled error',
+						"Removing due to unhandled error",
 					);
 
 					this.funcs.splice(index, 1);
@@ -353,7 +356,7 @@ class Logger {
 				return;
 			}
 
-			let message = '';
+			let message = "";
 
 			for (let i = 0; i < data.length; i++) {
 				message += `${data[i]} `;
@@ -458,7 +461,7 @@ type files =
 			 * @default json
 			 * @ignore Incomplete section
 			 */
-			type: 'json' | 'txt';
+			type: "json" | "txt";
 	  }
 	| {
 			/**
@@ -488,7 +491,7 @@ type web =
 			 * @default json
 			 * @ignore Incomplete section
 			 */
-			type: 'json' | 'txt';
+			type: "json" | "txt";
 			/**
 			 * How many logs to store before POSTing to avoid getting ratelimited
 			 * @default 5
@@ -514,44 +517,44 @@ type logFunction = (level: Level, ...data: any[]) => void;
  * @see colorList From package console-log-colors
  */
 type ColourList =
-	| 'black'
-	| 'red'
-	| 'green'
-	| 'yellow'
-	| 'blue'
-	| 'magenta'
-	| 'cyan'
-	| 'white'
-	| 'gray'
-	| 'grey'
-	| 'redBright'
-	| 'greenBright'
-	| 'yellowBright'
-	| 'blueBright'
-	| 'magentaBright'
-	| 'cyanBright'
-	| 'whiteBright'
-	| 'bgBlack'
-	| 'bgRed'
-	| 'bgGreen'
-	| 'bgYellow'
-	| 'bgBlue'
-	| 'bgMagenta'
-	| 'bgCyan'
-	| 'bgWhite'
-	| 'blackBG'
-	| 'redBG'
-	| 'greenBG'
-	| 'yellowBG'
-	| 'blueBG'
-	| 'magentaBG'
-	| 'cyanBG'
-	| 'whiteBG'
-	| 'bgBlackBright'
-	| 'bgRedBright'
-	| 'bgGreenBright'
-	| 'bgYellowBright'
-	| 'bgBlueBright'
-	| 'bgMagentaBright'
-	| 'bgCyanBright'
-	| 'bgWhiteBright';
+	| "black"
+	| "red"
+	| "green"
+	| "yellow"
+	| "blue"
+	| "magenta"
+	| "cyan"
+	| "white"
+	| "gray"
+	| "grey"
+	| "redBright"
+	| "greenBright"
+	| "yellowBright"
+	| "blueBright"
+	| "magentaBright"
+	| "cyanBright"
+	| "whiteBright"
+	| "bgBlack"
+	| "bgRed"
+	| "bgGreen"
+	| "bgYellow"
+	| "bgBlue"
+	| "bgMagenta"
+	| "bgCyan"
+	| "bgWhite"
+	| "blackBG"
+	| "redBG"
+	| "greenBG"
+	| "yellowBG"
+	| "blueBG"
+	| "magentaBG"
+	| "cyanBG"
+	| "whiteBG"
+	| "bgBlackBright"
+	| "bgRedBright"
+	| "bgGreenBright"
+	| "bgYellowBright"
+	| "bgBlueBright"
+	| "bgMagentaBright"
+	| "bgCyanBright"
+	| "bgWhiteBright";
