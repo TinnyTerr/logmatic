@@ -251,8 +251,7 @@ The colour should be derived from the package [console-log-colors](https://www.n
 	{ name: "warn", colour: "yellow" },
 	{ name: "error", colour: "red" },
 	{ name: "fatal", colour: "redBG" },
-]).loggers
-> ```
+    ]).loggers
 
 ---
 ### Functions
