@@ -22,7 +22,18 @@ export enum Level {
 	Fatal = 5,
 }
 
-class Logger {
+const defaultLevels = [
+	{ name: "trace", colour: "cyanBright" },
+	{ name: "debug", colour: "blueBG" },
+	{ name: "info", colour: "blue" },
+	{ name: "warn", colour: "yellow" },
+	{ name: "error", colour: "red" },
+	{ name: "fatal", colour: "redBG" },
+] as const;
+
+type DefaultLevels = typeof defaultLevels;
+
+class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 	name: string;
 	webData: any[] = [];
 	options: Options & {
@@ -31,22 +42,8 @@ class Logger {
 	};
 	webCounter: number = 0;
 	funcs: Array<(level: Level, ...data: any[]) => void> = [];
-	constructor(name: string, options: Partial<ClassOptions> = {}) {
+	constructor(name: string, options: Partial<ClassOptions> = {}, levels?: T) {
 		this.name = name;
-
-		// Normalize levels and functions
-		const normalizedLevels = options.levels
-			? Array.isArray(options.levels)
-				? options.levels
-				: [options.levels]
-			: [
-				{ name: "trace", colour: "cyanBright" },
-				{ name: "debug", colour: "blueBG" },
-				{ name: "info", colour: "blue" },
-				{ name: "warn", colour: "yellow" },
-				{ name: "error", colour: "red" },
-				{ name: "fatal", colour: "redBG" },
-			] as customLevel[];
 
 		const normalizedFunctions: logFunction[] = Array.isArray(options.functions)
 			? options.functions
@@ -85,16 +82,39 @@ class Logger {
 				}
 				: { enabled: false };
 
+
+		const defaultLevels = [
+			{ name: "trace", colour: "cyanBright" },
+			{ name: "debug", colour: "blueBG" },
+			{ name: "info", colour: "blue" },
+			{ name: "warn", colour: "yellow" },
+			{ name: "error", colour: "red" },
+			{ name: "fatal", colour: "redBG" },
+		] as const;
+
+		const defaultFunctions: logFunction[] = [];
+
 		this.options = {
-			console: defaultConsole,
-			files: defaultFiles,
-			web: defaultWeb,
-			levels: normalizedLevels,
-			functions: normalizedFunctions,
+			console: { ...defaultConsole, ...(options.console ?? {}) } as console,
+			files: { ...defaultFiles, ...(options.files ?? {}) } as files,
+			web: { ...defaultWeb, ...(options.web ?? {}) } as web,
+			// @ts-expect-error - Type mismatch
+			levels: Array.isArray(levels)
+				? levels
+				: levels
+					? [levels]
+					: [...defaultLevels],
+			functions: Array.isArray(options.functions)
+				? options.functions
+				: options.functions
+					? [options.functions]
+					: defaultFunctions,
 		};
 
 		this.funcs = normalizedFunctions ?? [];
-		this.loggers = {} as Logger["loggers"];
+		this.loggers = {} as {
+			[K in T[number]as K['name']]: (...args: any[]) => void;
+		}
 
 		// Generate logger functions
 		for (let i = 0; i < this.options.levels.length; i++) {
@@ -111,39 +131,14 @@ class Logger {
 			};
 		}
 
-		// Required to satisfy declared fields
-		this.loggers.trace ||= () => {
-			/* no empty blocks guys!!! */
-		};
-		this.loggers.debug ||= () => {
-			/* no empty blocks guys!!! */
-		};
-		this.loggers.info ||= () => {
-			/* no empty blocks guys!!! */
-		};
-		this.loggers.warn ||= () => {
-			/* no empty blocks guys!!! */
-		};
-		this.loggers.error ||= () => {
-			/* no empty blocks guys!!! */
-		};
-		this.loggers.fatal ||= () => {
-			/* no empty blocks guys!!! */
-		};
-
 		if (this.options.web.enabled) {
 			this.webCounter = this.options.web.every;
 		}
 	}
 
 	loggers: {
-		trace: (...data: any[]) => void;
-		debug: (...data: any[]) => void;
-		info: (...data: any[]) => void;
-		warn: (...data: any[]) => void;
-		error: (...data: any[]) => void;
-		fatal: (...data: any[]) => void;
-	} & Record<string, (...data: any[]) => void>;
+		[K in T[number]as K['name']]: (...args: any[]) => void;
+	};
 	/**
 	 * Pushes custom handling functions on top of the already selected methods
 	 */
@@ -373,7 +368,7 @@ interface Options {
 	console: console;
 	files: files;
 	web: web;
-	levels: customLevel[] | customLevel;
+	levels: customLevel[]
 	functions: logFunction[] | logFunction;
 }
 
@@ -381,7 +376,6 @@ interface ClassOptions {
 	console: Partial<console>;
 	files: Partial<files>;
 	web: Partial<web>;
-	levels: customLevel[] | customLevel;
 	functions: logFunction[] | logFunction;
 }
 
