@@ -253,7 +253,7 @@ The colour should be derived from the package [console-log-colors](https://www.n
 >	{ name: "error", colour: "red" },
 >	{ name: "fatal", colour: "redBG" },
 >   // Your levels here...
->    ]).loggers
+> ]).loggers
 > ```
 
 ---
