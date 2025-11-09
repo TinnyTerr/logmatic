@@ -232,14 +232,28 @@ const log = new Logger("name", { web: { every: 5 }}).loggers
 
 This logger allows you to add your own levels, following out format. Formatted the following:
 ```javascript
-const log = new Logger("name", { levels: { name: "level", colour:"red" }}).loggers
+const log = new Logger("name", {}, { name: "level", colour:"red" }).loggers
 // **OR**
-const log = new Logger("name", { levels: [{ name: "level", colour:"red" }]}).loggers
+const log = new Logger("name", {}, [{ name: "level", colour:"red" }]).loggers
 ```
 
 The colour should be derived from the package [console-log-colors](https://www.npmjs.com/package/console-log-colors) or from a slimmed list included in the types.
 
-Also, you are able to overwrite existing functions. For example, you could overwrite the info logger level by redefining it. 
+> [!WARNING]
+> This will overwrite the default levels, so make sure you redefine them if you need them, and are just making an extra few.
+
+> [!NOTE]
+> ```javascript
+> new Logger("name", {}, [
+	{ name: "trace", colour: "cyanBright" },
+	{ name: "debug", colour: "blueBG" },
+	{ name: "info", colour: "blue" },
+	{ name: "warn", colour: "yellow" },
+	{ name: "error", colour: "red" },
+	{ name: "fatal", colour: "redBG" },
+]).loggers
+> ```
+
 ---
 ### Functions
 
