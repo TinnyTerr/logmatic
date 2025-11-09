@@ -243,15 +243,18 @@ The colour should be derived from the package [console-log-colors](https://www.n
 > This will overwrite the default levels, so make sure you redefine them if you need them, and are just making an extra few.
 
 > [!NOTE]
+> If you require the default levels back, then use:
 > ```javascript
 > new Logger("name", {}, [
-	{ name: "trace", colour: "cyanBright" },
-	{ name: "debug", colour: "blueBG" },
-	{ name: "info", colour: "blue" },
-	{ name: "warn", colour: "yellow" },
-	{ name: "error", colour: "red" },
-	{ name: "fatal", colour: "redBG" },
-    ]).loggers
+>	{ name: "trace", colour: "cyanBright" },
+>	{ name: "debug", colour: "blueBG" },
+>	{ name: "info", colour: "blue" },
+>	{ name: "warn", colour: "yellow" },
+>	{ name: "error", colour: "red" },
+>	{ name: "fatal", colour: "redBG" },
+>   // Your levels here...
+>    ]).loggers
+> ```
 
 ---
 ### Functions
