@@ -1,6 +1,7 @@
 {
-    "name": "@tinnyterr/logmatic",
-    "version": "3.0.0",
+    "name": "logmatic",
+    "private": false,
+    "version": "3.0.2",
     "homepage": "https://github.com/tinnyterr/logmatic#readme",
     "bugs": {
         "url": "https://github.com/tinnyterr/logmatic/issues"
