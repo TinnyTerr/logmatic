@@ -10,18 +10,6 @@ function getTime(): string {
 	return date.toISOString().replace(/.*T(.*)Z/, "$1");
 }
 
-/**
- * Optional enum of default levels. Corresponds to array
- */
-export enum Level {
-	Trace = 0,
-	Debug = 1,
-	Info = 2,
-	Warn = 3,
-	Error = 4,
-	Fatal = 5,
-}
-
 const defaultLevels = [
 	{ name: "trace", colour: "cyanBright" },
 	{ name: "debug", colour: "blueBG" },
@@ -56,7 +44,7 @@ class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 			 * @see {Level}
 			 * @default Level.Debug
 			 */
-			logLevel: T[number]["name"];
+			logLevel: T[number]["name"][];
 			/**
 			 * Whether to suppress warnings or errors emitted by the logger
 			 * @default false
@@ -96,18 +84,18 @@ class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 				? [options.functions]
 				: [];
 
-		const defaultConsole: console =
+		const defaultConsole =
 			options.console?.enabled === true
 				? {
 						enabled: true,
-						logLevel: options.console?.logLevel ?? Level.Debug,
+						logLevel: options.console?.logLevel ?? ["trace"],
 						suppressWarnings: options.console?.suppressWarnings ?? false,
 						format: options.console?.format ?? false,
 						indent: options.console?.indent ?? 0,
 					}
 				: { enabled: false };
 
-		const defaultFiles: files =
+		const defaultFiles =
 			options.files?.enabled === true
 				? {
 						enabled: true,
@@ -117,7 +105,7 @@ class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 					}
 				: { enabled: false };
 
-		const defaultWeb: web =
+		const defaultWeb =
 			options.web?.enabled === true
 				? {
 						enabled: true,
@@ -205,7 +193,7 @@ class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 			// Ensure that logging is enabled and the level is allowed by the logLevel
 			if (
 				!this.options.console.enabled ||
-				level < this.options.console.logLevel
+				this.options.console.logLevel.includes(this.options.levels[level].name)
 			) {
 				return;
 			}
@@ -386,7 +374,7 @@ class Logger<const T extends readonly customLevel[] = DefaultLevels> {
 	 */
 	private internalLogging(...data: string[]) {
 		if (this.options.console.enabled === true) {
-			if (this.options.console.logLevel > Level.Trace) {
+			if (this.options.console.logLevel.includes("trace")) {
 				return;
 			}
 
@@ -417,7 +405,7 @@ interface Options {
 	functions: logFunction[] | logFunction;
 }
 
-interface ClassOptions {
+export interface ClassOptions {
 	console: Partial<console>;
 	files: Partial<files>;
 	web: Partial<web>;
@@ -441,7 +429,7 @@ type console =
 			 * @see {Level}
 			 * @default Level.Debug
 			 */
-			logLevel: Level;
+			logLevel: string[];
 			/**
 			 * Whether to suppress warnings or errors emitted by the logger
 			 * @default false
